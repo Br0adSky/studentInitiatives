@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Main Page</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+</head>
+<body>
+<div>
+    <form method="post">
+        <input th:type="text" name="name" placeholder="Введите имя">
+        <input th:type="text" name="email" placeholder="Введите email">
+        <button type="submit">Добавить</button>
+    </form>
+</div>
+<table border="1">
+    <tr>
+        <th>name</th>
+        <th>email</th>
+    </tr>
+    <tr th:each = "user: ${users}">
+        <td th:text="${user.name}">name</td>
+        <td th:text="${user.email}">email</td>
+    </tr>
+</table>
+</body>
+</html>
