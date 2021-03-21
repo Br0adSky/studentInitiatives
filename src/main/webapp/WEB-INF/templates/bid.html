@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Main Page</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+</head>
+<body>
+<div>
+    <form method="post" action="addBid">
+        <input type="text" name="name" placeholder="Введите имя">
+        <input type="text" name="text" placeholder="Введите текст заявки">
+        <button type="submit">Добавить заявку</button>
+    </form>
+    <div>Список заявок по тексту</div>
+    <form method="post" action="filterText">
+        <label>
+            <input type="text" name="filterText">
+        </label>
+        <button type="submit">Найти</button>
+    </form>
+</div>
+<table border="1">
+    <tr>
+        <th>name</th>
+        <th>text</th>
+    </tr>
+    <tr th:each = "bid: ${bids}">
+        <td th:text="${bid.name}">name</td>
+        <td th:text="${bid.text}">text</td>
+    </tr>
+</table>
+<form method="post" action="/filterName">
+    <div>Список заявок по именам</div>
+    <label>
+        <input type="text" name="filterName">
+    </label>
+    <button type="submit">Найти</button>
+</form>
+</body>
+</html>
