@@ -21,11 +21,11 @@
 </div>
 <table border="1">
     <tr>
-        <th>name</th>
+        <th>studentId</th>
         <th>text</th>
     </tr>
     <tr th:each = "bid: ${bids}">
-        <td th:text="${bid.name}">name</td>
+        <td th:text="${bid.studentId}">studentId</td>
         <td th:text="${bid.text}">text</td>
     </tr>
 </table>
@@ -35,6 +35,9 @@
         <input type="text" name="filterName">
     </label>
     <button type="submit">Найти</button>
+</form>
+<form th:action="@{/logout}" method="post">
+    <input type="submit" value="Sign Out"/>
 </form>
 </body>
 </html>

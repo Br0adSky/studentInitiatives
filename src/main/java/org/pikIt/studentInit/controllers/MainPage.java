@@ -16,12 +16,6 @@ import java.util.List;
 public class MainPage {
 
     private BidRepository bidRepository;
-//    private UserRepository userRepository;
-
-//    @Autowired
-//    public void setUserRepository(UserRepository userRepository) {
-//        this.userRepository = userRepository;
-//    }
 
     @Autowired
     public void setBidRepository(BidRepository bidRepository) {
@@ -68,10 +62,10 @@ public class MainPage {
     }
 
     @PostMapping("/bid/filterName")
-    public String filterName(@RequestParam String filterName,
+    public String filterName(@RequestParam Integer studentId,
                              Model model) {
-        if (filterName != null && !filterName.isEmpty()) {
-            model.addAttribute("bids", bidRepository.findByName(filterName));
+        if (studentId != null) {
+            model.addAttribute("bids", bidRepository.findByStudentId(studentId));
         } else {
             model.addAttribute("bids", bidRepository.findAll());
         }

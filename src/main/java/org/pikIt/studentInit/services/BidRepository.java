@@ -8,6 +8,6 @@ import java.util.List;
 
 @Repository
 public interface BidRepository extends CrudRepository<Bid, Integer>{
-    List<Bid> findByName(String name);
+    List<Bid> findByStudentId(Integer studentId);
 
 }
