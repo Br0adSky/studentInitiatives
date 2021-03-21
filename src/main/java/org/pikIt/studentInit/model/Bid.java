@@ -1,9 +1,6 @@
 package org.pikIt.studentInit.model;
 
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
+import javax.persistence.*;
 
 @Entity
 public class Bid {
@@ -11,21 +8,18 @@ public class Bid {
     @GeneratedValue(strategy = GenerationType.SEQUENCE)
     private Integer id;
 
-    private Integer studentId;
     private String text;
 
-    public Bid(Integer studentId, String text) {
-        this.studentId = studentId;
+
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "student_id")
+    private User author;
+
+    public Bid(String text, User author) {
         this.text = text;
+        this.author = author;
     }
 
-    public Integer getStudentId() {
-        return studentId;
-    }
-
-    public void setStudentId(Integer studentId) {
-        this.studentId = studentId;
-    }
 
     public Bid() {
     }
@@ -34,8 +28,18 @@ public class Bid {
     public String getText() {
         return text;
     }
+    public String getAuthorName(){
+        return author.getName();
+    }
 
     public void setText(String text) {
         this.text = text;
+    }
+    public User getAuthor() {
+        return author;
+    }
+
+    public void setAuthor(User author) {
+        this.author = author;
     }
 }

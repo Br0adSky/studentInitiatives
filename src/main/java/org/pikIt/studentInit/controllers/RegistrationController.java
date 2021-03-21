@@ -29,7 +29,6 @@ public class RegistrationController {
     public String addUser(User user, Model model) {
         if (userRepository.findByEmail(user.getEmail()) != null) {
             model.addAttribute("message","User exist");
-            System.out.println(user.getEmail());
             return "registration";
         }
         user.setActive(true);

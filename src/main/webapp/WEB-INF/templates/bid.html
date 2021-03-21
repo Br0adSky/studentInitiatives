@@ -7,37 +7,49 @@
 <body>
 <div>
     <form method="post" action="addBid">
-        <input type="text" name="name" placeholder="Введите имя">
         <input type="text" name="text" placeholder="Введите текст заявки">
         <button type="submit">Добавить заявку</button>
+        <input type="hidden" value="${_csrf.token}" name="${_csrf.parameterName}"/>
     </form>
+
     <div>Список заявок по тексту</div>
     <form method="post" action="filterText">
         <label>
             <input type="text" name="filterText">
         </label>
         <button type="submit">Найти</button>
+        <input type="hidden" value="${_csrf.token}" name="${_csrf.parameterName}"/>
+    </form>
+
+    <form method="post" action="allBidsByName">
+        <div>Все заявки пользователя</div>
+        <button type="submit">Отобразить</button>
+        <input type="hidden" value="${_csrf.token}" name="${_csrf.parameterName}"/>
+
+    </form>
+
+    <form method="post" action="filterName">
+        <div>Список заявок по именам</div>
+        <label>
+            <input type="text" name="filterName">
+        </label>
+        <button type="submit">Найти</button>
+        <input type="hidden" value="${_csrf.token}" name="${_csrf}"/>
+        <table border="1">
+            <tr>
+                <th>Имя Студента</th>
+                <th>Текст заявки</th>
+            </tr>
+            <tr th:each = "bid: ${bids}">
+                <td th:text="${bid.authorName}">student_id</td>
+                <td th:text="${bid.text}">text</td>
+            </tr>
+        </table>
     </form>
 </div>
-<table border="1">
-    <tr>
-        <th>studentId</th>
-        <th>text</th>
-    </tr>
-    <tr th:each = "bid: ${bids}">
-        <td th:text="${bid.studentId}">studentId</td>
-        <td th:text="${bid.text}">text</td>
-    </tr>
-</table>
-<form method="post" action="/filterName">
-    <div>Список заявок по именам</div>
-    <label>
-        <input type="text" name="filterName">
-    </label>
-    <button type="submit">Найти</button>
-</form>
 <form th:action="@{/logout}" method="post">
-    <input type="submit" value="Sign Out"/>
+    <input type="submit" value="Выйти из аккаунта"/>
+    <input type="hidden" value="${_csrf.token}" name="${_csrf.parameterName}"/>
 </form>
 </body>
 </html>

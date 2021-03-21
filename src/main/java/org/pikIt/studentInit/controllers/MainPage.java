@@ -1,8 +1,10 @@
 package org.pikIt.studentInit.controllers;
 
 import org.pikIt.studentInit.model.Bid;
+import org.pikIt.studentInit.model.User;
 import org.pikIt.studentInit.services.BidRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -23,7 +25,7 @@ public class MainPage {
     }
 
     @GetMapping("/")
-    public String homePage(){
+    public String homePage() {
         return "homePage";
     }
 
@@ -33,18 +35,19 @@ public class MainPage {
         return "bid";
     }
 
-    @PostMapping("/bid/addBid")
-    public String addBid(@RequestParam Integer studentId, @RequestParam String text,
+    @PostMapping("addBid")
+    public String addBid(@AuthenticationPrincipal User user,
+                         @RequestParam String text,
                          Model model) {
 
-        Bid bid = new Bid(studentId, text);
+        Bid bid = new Bid(text, user);
         bidRepository.save(bid);
         model.addAttribute("bids", bidRepository.findAll());
 
         return "bid";
     }
 
-    @PostMapping("/bid/filterText")
+    @PostMapping("filterText")
     public String filterText(@RequestParam String filterText,
                              Model model) {
         List<Bid> texts = new ArrayList<>();
@@ -61,14 +64,29 @@ public class MainPage {
         return "bid";
     }
 
-    @PostMapping("/bid/filterName")
-    public String filterName(@RequestParam Integer studentId,
-                             Model model) {
-        if (studentId != null) {
-            model.addAttribute("bids", bidRepository.findByStudentId(studentId));
+    @PostMapping("filterName")
+    public String filterName(
+            @RequestParam String filterName,
+            Model model) {
+        List<Bid> name = new ArrayList<>();
+        if (filterName != null && !filterName.isEmpty()) {
+            for (Bid bid : bidRepository.findAll()) {
+                if (bid.getAuthorName().contains(filterName)) {
+                    name.add(bid);
+                }
+            }
+            model.addAttribute("bids", name);
         } else {
             model.addAttribute("bids", bidRepository.findAll());
         }
+        return "bid";
+    }
+
+    @PostMapping("allBidsByName")
+    public String allBidsByName(
+            @AuthenticationPrincipal User user,
+            Model model) {
+        model.addAttribute("bids", bidRepository.findBidByAuthor(user));
         return "bid";
     }
 }
