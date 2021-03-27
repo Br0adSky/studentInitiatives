@@ -1,7 +1,9 @@
 package org.pikIt.studentInit.model;
 
-import javax.persistence.*;
+import lombok.Data;
 
+import javax.persistence.*;
+@Data
 @Entity
 public class Bid {
     @Id
@@ -24,22 +26,8 @@ public class Bid {
     public Bid() {
     }
 
-
-    public String getText() {
-        return text;
-    }
     public String getAuthorName(){
         return author.getName();
     }
 
-    public void setText(String text) {
-        this.text = text;
-    }
-    public User getAuthor() {
-        return author;
-    }
-
-    public void setAuthor(User author) {
-        this.author = author;
-    }
 }

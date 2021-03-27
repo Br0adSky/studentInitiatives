@@ -9,7 +9,7 @@
     <form method="post" action="addBid">
         <input type="text" name="text" placeholder="Введите текст заявки">
         <button type="submit">Добавить заявку</button>
-        <input type="hidden" value="${_csrf.token}" name="${_csrf.parameterName}"/>
+        <input type="hidden" th:value="${_csrf.token}" th:name="_csrf"/>
     </form>
 
     <div>Список заявок по тексту</div>
@@ -18,13 +18,13 @@
             <input type="text" name="filterText">
         </label>
         <button type="submit">Найти</button>
-        <input type="hidden" value="${_csrf.token}" name="${_csrf.parameterName}"/>
+        <input type="hidden" th:value="${_csrf.token}" th:name="_csrf"/>
     </form>
 
     <form method="post" action="allBidsByName">
         <div>Все заявки пользователя</div>
         <button type="submit">Отобразить</button>
-        <input type="hidden" value="${_csrf.token}" name="${_csrf.parameterName}"/>
+        <input type="hidden" th:value="${_csrf.token}" th:name="_csrf"/>
 
     </form>
 
@@ -33,9 +33,9 @@
         <label>
             <input type="text" name="filterName">
         </label>
+        <input type="hidden" th:value="${_csrf.token}" th:name="_csrf"/>
         <button type="submit">Найти</button>
-        <input type="hidden" value="${_csrf.token}" name="${_csrf}"/>
-        <table border="1">
+        <table>
             <tr>
                 <th>Имя Студента</th>
                 <th>Текст заявки</th>
@@ -49,7 +49,7 @@
 </div>
 <form th:action="@{/logout}" method="post">
     <input type="submit" value="Выйти из аккаунта"/>
-    <input type="hidden" value="${_csrf.token}" name="${_csrf.parameterName}"/>
+    <input type="hidden" th:value="${_csrf.token}" th:name="_csrf"/>
 </form>
 </body>
 </html>

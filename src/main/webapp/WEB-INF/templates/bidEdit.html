@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Bid editor</title>
+</head>
+<body>
+<form action="/bids" method="post">
+    <label>
+        <input th:type="text" th:name="text" th:value="${bid2.text}">
+        <input th:type="hidden" th:value="${bid2.id}" th:name="bid">
+    </label>
+    <input type="hidden" th:value="${_csrf.token}" th:name="_csrf"/>
+    <button type="submit">Сохранить</button>
+</form>
+</body>
+</html>

@@ -11,8 +11,6 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
-import java.util.ArrayList;
-import java.util.List;
 
 @Controller
 public class MainPage {
@@ -29,10 +27,10 @@ public class MainPage {
         return "homePage";
     }
 
-    @GetMapping("/bid")
+    @GetMapping("/mainPage")
     public String main(Model model) {
         model.addAttribute("bids", bidRepository.findAll());
-        return "bid";
+        return "mainPage";
     }
 
     @PostMapping("addBid")
@@ -44,42 +42,30 @@ public class MainPage {
         bidRepository.save(bid);
         model.addAttribute("bids", bidRepository.findAll());
 
-        return "bid";
+        return "mainPage";
     }
 
     @PostMapping("filterText")
     public String filterText(@RequestParam String filterText,
                              Model model) {
-        List<Bid> texts = new ArrayList<>();
         if (filterText != null && !filterText.isEmpty()) {
-            for (Bid bid : bidRepository.findAll()) {
-                if (bid.getText().contains(filterText)) {
-                    texts.add(bid);
-                }
-            }
-            model.addAttribute("bids", texts);
+            model.addAttribute("bids", bidRepository.findBidByTextContaining(filterText));
         } else {
             model.addAttribute("bids", bidRepository.findAll());
         }
-        return "bid";
+        return "mainPage";
     }
 
     @PostMapping("filterName")
     public String filterName(
             @RequestParam String filterName,
             Model model) {
-        List<Bid> name = new ArrayList<>();
         if (filterName != null && !filterName.isEmpty()) {
-            for (Bid bid : bidRepository.findAll()) {
-                if (bid.getAuthorName().contains(filterName)) {
-                    name.add(bid);
-                }
-            }
-            model.addAttribute("bids", name);
+            model.addAttribute("bids", bidRepository.findBidByAuthor_NameContaining(filterName));
         } else {
             model.addAttribute("bids", bidRepository.findAll());
         }
-        return "bid";
+        return "mainPage";
     }
 
     @PostMapping("allBidsByName")
@@ -87,6 +73,6 @@ public class MainPage {
             @AuthenticationPrincipal User user,
             Model model) {
         model.addAttribute("bids", bidRepository.findBidByAuthor(user));
-        return "bid";
+        return "mainPage";
     }
 }

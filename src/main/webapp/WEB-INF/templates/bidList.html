@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Bid List</title>
+</head>
+<body>
+<div>
+    <form>
+        <div>Список пользователей</div>
+        <table>
+            <tr>
+                <th>Имя Студента</th>
+                <th>Роли пользователя</th>
+                <th>Текст заявки</th>
+                <th>Редактирование заявок</th>
+            </tr>
+            <tr th:each="bid: ${bids}">
+                <td th:text="${bid.getAuthorName()}">Имя пользователя</td>
+                <td th:text="${bid.author.roles}">Роли</td>
+                <td th:text="${bid.text}">Заявки</td>
+                <td> <a th:href="@{/bids/{id}(id=${bid.id})}">Редактировать</a></td>
+            </tr>
+        </table>
+    </form>
+</div>
+</body>
+</html>
