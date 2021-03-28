@@ -7,6 +7,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import javax.persistence.*;
 import java.util.Collection;
 import java.util.Set;
+
 @Data
 @Entity
 @Table(name = "usr")
@@ -45,7 +46,7 @@ public class User implements UserDetails {
 
     @Override
     public String getUsername() {
-        return null;
+        return getName() + " " + getSurname();
     }
 
     @Override

@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="https://www.thymeleaf.org" lang="ru">
+<head>
+    <title>Авторизация</title>
+</head>
+<body>
+<div th:if="${param.error}">
+    Неверное имя пользователя или пароль
+</div>
+<div th:if="${param.logout}">
+    Вы вышли из аккаунта
+</div>
+<form th:action="@{/home}" method="post">
+    <div><label> Почта : <input type="text" name="username"/> </label></div>
+    <br>
+    <div><label> Пароль: <input type="password" name="password"/> </label></div>
+    <input type="hidden" th:value="${_csrf.token}" th:name="_csrf"/>
+    <div><input type="submit" value="Войти"/></div>
+</form>
+<a href="home/registration">Зарегистрироваться</a>
+</body>
+</html>

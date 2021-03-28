@@ -6,7 +6,9 @@
 </head>
 <body>
 <div>Здравствуй, студент</div>
-<a href="/mainPage">К заявкам!!</a>
-
+<form th:action="homePage" method="post">
+    <input type="hidden" th:value="${_csrf.token}" th:name="_csrf"/>
+    <button type="submit">Войти в кабинет</button>
+</form>
 </body>
 </html>

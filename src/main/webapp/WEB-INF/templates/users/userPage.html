@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="ru">
+<head>
+    <title>Main Page</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+</head>
+<body>
+<div>
+    <form method="post" action="/users/userPage/addBid">
+        <label><input type="text" name="text" placeholder="Введите текст заявки"></label>
+        <button type="submit">Добавить заявку</button>
+        <input type="hidden" th:value="${_csrf.token}" th:name="_csrf"/>
+    </form>
+
+    <div>Список заявок по тексту</div>
+    <form method="post" action="/users/userPage/filterText">
+        <label>
+            <input type="text" name="filterText">
+        </label>
+        <button type="submit">Найти</button>
+        <input type="hidden" th:value="${_csrf.token}" th:name="_csrf"/>
+    </form>
+
+    <div>Поиск заявок пользователя</div>
+    <form method="post" action="/users/userPage/filterName">
+        <label>
+            <input type="text" name="filterName" placeholder="Введите имя пользователя">
+            <input type="text" name="filterSurname" placeholder="Введите фамилию пользователя">
+        </label>
+        <button type="submit">Найти</button>
+        <input type="hidden" th:value="${_csrf.token}" th:name="_csrf"/>
+    </form>
+
+    <form method="post" action="/users/userPage/allBidsByName">
+        <div>Все мои заявки</div>
+        <button type="submit">Отобразить</button>
+        <input type="hidden" th:value="${_csrf.token}" th:name="_csrf"/>
+        <div th:text="${message}"></div>
+        <table>
+            <tr>
+                <th>Имя Студента</th>
+                <th>Фамилия Студента</th>
+                <th>Текст заявки</th>
+                <th>Статус заявки</th>
+                <th>Редактировать заявку</th>
+            </tr>
+            <tr th:each="bid: ${bids}">
+                <td th:text="${bid.author.getName()}"></td>
+                <td th:text="${bid.author.getSurname()}"></td>
+                <td th:text="${bid.text}"></td>
+                <td th:text="${bid.confirmed}"></td>
+                <td> <a th:href="@{userPage/{id}(id=${bid.id})}">Редактировать</a></td>
+            </tr>
+        </table>
+    </form>
+</div>
+
+<form th:action="@{/logout}" method="post">
+    <input type="submit" value="Выйти из аккаунта"/>
+    <input type="hidden" th:value="${_csrf.token}" th:name="_csrf"/>
+</form>
+</body>
+</html>
