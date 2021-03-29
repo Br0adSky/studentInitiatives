@@ -5,7 +5,7 @@
     <title>User editor</title>
 </head>
 <body>
-<form action="/users/save" method="post">
+<form action="/users/superUserPage/save" method="post">
     <label>
         <td th:each="role: ${roles}">
             <input type="checkbox" th:name="${role}" th:text="${role.name()}">

@@ -6,12 +6,11 @@
 </head>
 <body>
 <div>
-    <form method="post" action="/users/userPage/addBid">
-        <label><input type="text" name="text" placeholder="Введите текст заявки"></label>
-        <button type="submit">Добавить заявку</button>
+    <form th:action="@{/logout}" method="post" style="float: right;">
+        <input type="submit" value="Выйти из аккаунта"/>
         <input type="hidden" th:value="${_csrf.token}" th:name="_csrf"/>
     </form>
-
+    <a href="/bids/addNewBid">Добавить новую заявку</a>
     <div>Список заявок по тексту</div>
     <form method="post" action="/users/userPage/filterText">
         <label>
@@ -42,22 +41,24 @@
                 <th>Фамилия Студента</th>
                 <th>Текст заявки</th>
                 <th>Статус заявки</th>
+                <th>Адрес</th>
+                <th>Цена от</th>
+                <th>Цена до</th>
                 <th>Редактировать заявку</th>
             </tr>
             <tr th:each="bid: ${bids}">
                 <td th:text="${bid.author.getName()}"></td>
                 <td th:text="${bid.author.getSurname()}"></td>
                 <td th:text="${bid.text}"></td>
-                <td th:text="${bid.confirmed}"></td>
-                <td> <a th:href="@{userPage/{id}(id=${bid.id})}">Редактировать</a></td>
+                <td th:text="${bid.status}"></td>
+                <td th:text="${bid.address}?: 'Не указан'"></td>
+                <td th:text="${bid.priseFrom}?: 'Неизвестно'"></td>
+                <td th:text="${bid.priseTo}?: 'Неизвестно'"></td>
+                <td> <a th:href="@{/users/userPage/{id}(id=${bid.id})}">Редактировать</a></td>
             </tr>
         </table>
     </form>
 </div>
 
-<form th:action="@{/logout}" method="post">
-    <input type="submit" value="Выйти из аккаунта"/>
-    <input type="hidden" th:value="${_csrf.token}" th:name="_csrf"/>
-</form>
 </body>
 </html>

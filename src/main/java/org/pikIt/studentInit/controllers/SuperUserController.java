@@ -2,6 +2,7 @@ package org.pikIt.studentInit.controllers;
 
 import org.pikIt.studentInit.model.Role;
 import org.pikIt.studentInit.model.User;
+import org.pikIt.studentInit.services.BidRepository;
 import org.pikIt.studentInit.services.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -15,15 +16,16 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 @Controller
-@RequestMapping("/users")
+@RequestMapping("/users/superUserPage")
 @PreAuthorize("hasAuthority('SUPER_USER')")
 public class SuperUserController {
     private UserRepository userRepository;
+    private BidRepository bidRepository;
 
     @GetMapping
     public String userList(Model model) {
         model.addAttribute("users", userRepository.findAll());
-        return "users/userList";
+        return "users/superUserPage";
     }
 
     @GetMapping("{user}")
@@ -46,7 +48,21 @@ public class SuperUserController {
                 user.getRoles().add(Role.valueOf(key));
         }
         userRepository.save(user);
-        return "redirect:/users";
+        return "redirect:/users/superUserPage";
+    }
+
+    @PostMapping("/searchUser")
+    public String searchUsers(@RequestParam String filterName,
+                              @RequestParam String filterSurname,
+                              Model model) {
+        if (filterName != null && !filterName.isBlank() || filterSurname != null && !filterSurname.isBlank()) {
+            model.addAttribute("users", userRepository.findByNameAndSurnameContains(filterName, filterSurname));
+            model.addAttribute("message", "Найденные пользователи");
+        } else {
+            model.addAttribute("message", "Пользователь не найден");
+            model.addAttribute("users", userRepository.findAll());
+        }
+        return "users/superUserPage";
     }
 
     @Autowired

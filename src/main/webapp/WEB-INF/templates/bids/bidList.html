@@ -3,22 +3,53 @@
 <head>
     <meta charset="UTF-8">
     <title>Bid List</title>
+
 </head>
 <body>
 <div>
+    <form th:action="@{/logout}" method="post" style="float: right;">
+        <input type="submit" value="Выйти из аккаунта"/>
+        <input type="hidden" th:value="${_csrf.token}" th:name="_csrf"/>
+    </form>
+    <div>Поиск пользователей</div>
+    <form method="post" action="/bids/searchBidByAuthor">
+        <label>
+            <input type="text" name="filterName" placeholder="Введите имя пользователя">
+            <input type="text" name="filterSurname" placeholder="Введите фамилию пользователя">
+        </label>
+        <button type="submit">Найти</button>
+        <input type="hidden" th:value="${_csrf.token}" th:name="_csrf"/>
+    </form>
+
+    <form method="post" action="/bids/searchBidByText">
+        <label>
+            <input type="text" name="filterText" placeholder="Введите название заявки">
+        </label>
+        <button type="submit">Найти</button>
+        <input type="hidden" th:value="${_csrf.token}" th:name="_csrf"/>
+    </form>
+
     <form>
-        <div>Список пользователей</div>
+        <div>Список заявок пользователей</div>
         <table>
             <tr>
-                <th>Имя Студента</th>
-                <th>Роли пользователя</th>
+                <th>Имя</th>
+                <th>Фамилия</th>
                 <th>Текст заявки</th>
-                <th>Редактирование заявок</th>
+                <th>Статус заявки</th>
+                <th>Адрес</th>
+                <th>Цена от</th>
+                <th>Цена до</th>
+                <th>Редактировать заявку</th>
             </tr>
             <tr th:each="bid: ${bids}">
-                <td th:text="${bid.getAuthorName()}">Имя пользователя</td>
-                <td th:text="${bid.author.roles}">Роли</td>
+                <td th:text="${bid.author.name}">Имя пользователя</td>
+                <td th:text="${bid.author.surname}"></td>
                 <td th:text="${bid.text}">Заявки</td>
+                <td th:text="${bid.status}"></td>
+                <td th:text="${bid.address}"></td>
+                <td th:text="${bid.priseFrom}"></td>
+                <td th:text="${bid.priseTo}"></td>
                 <td> <a th:href="@{/bids/{id}(id=${bid.id})}">Редактировать</a></td>
             </tr>
         </table>

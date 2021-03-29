@@ -1,6 +1,7 @@
 package org.pikIt.studentInit.controllers;
 
 import org.pikIt.studentInit.model.Bid;
+import org.pikIt.studentInit.model.BidStatus;
 import org.pikIt.studentInit.model.User;
 import org.pikIt.studentInit.services.BidRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -8,13 +9,17 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
+
+import javax.validation.Valid;
 
 
 @Controller
 @PreAuthorize("hasAuthority('USER')")
 @RequestMapping("users/userPage")
 public class UserController {
+
 
     private BidRepository bidRepository;
 
@@ -26,33 +31,48 @@ public class UserController {
 
     @GetMapping()
     public String main(Model model) {
-        model.addAttribute("message", "Все текущие заявки и их статус");
-        model.addAttribute("bids", bidRepository.findAll());
+        BidController.replaceBidList(model, bidRepository);
         return "users/userPage";
+    }
+
+    @GetMapping("/addNewBid")
+    public String addBidButton() {
+        return "redirect:/bids/addNewBid";
     }
 
     @PostMapping("/addBid")
     public String addBid(@AuthenticationPrincipal User user,
-                         @RequestParam String text,
+                         @Valid @RequestParam String text,
+                         @Valid @RequestParam Integer priseFrom,
+                         @Valid @RequestParam Integer priseTo,
+                         @Valid @RequestParam String address,
+                         BindingResult bindingResult,
                          Model model) {
-
-        Bid bid = new Bid(text, user, false);
-
+        if (bindingResult.hasErrors()) {
+            return "bids/addNewBid";
+        }
+        Bid bid = new Bid(text, user);
+        if (address == null) {
+            bid.setAddress("Не указано");
+        }
+        bid.setStatus(BidStatus.Новая);
+        bid.setText(text);
+        bid.setAddress(address);
+        bid.setPriseFrom(priseFrom);
+        bid.setPriseTo(priseTo);
         bidRepository.save(bid);
         model.addAttribute("bids", bidRepository.findAll());
 
+//        if (text != null && !text.isBlank()) {
+//
+//        }
         return "users/userPage";
     }
 
     @PostMapping("/filterText")
     public String filterText(@RequestParam String filterText,
                              Model model) {
-        model.addAttribute("message", "Заявки по введенному тексту");
-        if (filterText != null && !filterText.isEmpty()) {
-            model.addAttribute("bids", bidRepository.findBidByTextContaining(filterText));
-        } else {
-            model.addAttribute("bids", bidRepository.findAll());
-        }
+        BidController.searchByText(filterText, model, bidRepository);
         return "users/userPage";
     }
 
@@ -61,14 +81,8 @@ public class UserController {
             @RequestParam String filterName,
             @RequestParam String filterSurname,
             Model model) {
-        if (filterName != null && !filterName.isEmpty() || filterSurname != null && !filterSurname.isEmpty()) {
-            model.addAttribute("bids", bidRepository.findByNameAndSurnameContains(filterName, filterSurname));
-            model.addAttribute("message", "Заявки найденного пользователя");
-        } else {
-            model.addAttribute("message", "Пользователь не найден");
-            model.addAttribute("bids", bidRepository.findAll());
-        }
-        return "users/userPage";
+        BidController.searchByName(filterName, filterSurname, model, bidRepository);
+        return "/users/userPage";
     }
 
     @PostMapping("/allBidsByName")
@@ -93,10 +107,10 @@ public class UserController {
 
     @PostMapping("/save")
     public String bidSave(
-            @RequestParam String text,
+            @Valid @RequestParam String text,
             @RequestParam Bid bid) {
-        bid.setText(text);
-        bidRepository.save(bid);
+        BidController.saveBid(text, bid, bidRepository);
         return "redirect:/users/userPage";
     }
+
 }

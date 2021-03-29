@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="ru">
+<head>
+    <title>Add new Bid</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+</head>
+<body>
+<form method="post" action="/users/userPage/addBid">
+    <label><input type="text" name="text" placeholder="Введите текст заявки">
+        <input type="text" name="priseFrom" placeholder="Цена от">
+        <input type="text" name="priseTo" placeholder="Цена до">
+        <input type="text" name="address" placeholder="Введите адрес исполнения заявки">
+    </label>
+    <button type="submit">Добавить заявку</button>
+    <input type="hidden" th:value="${_csrf.token}" th:name="_csrf"/>
+</form>
+</body>
+</html>

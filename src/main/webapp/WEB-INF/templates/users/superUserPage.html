@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>User List</title>
+</head>
+<body>
+<div>
+    <form th:action="@{/logout}" method="post" style="float: right;">
+        <input type="submit" value="Выйти из аккаунта"/>
+        <input type="hidden" th:value="${_csrf.token}" th:name="_csrf"/>
+    </form>
+    <div>Поиск пользователей</div>
+    <form method="post" action="/users/superUserPage/searchUser">
+        <label>
+            <input type="text" name="filterName" placeholder="Введите имя пользователя">
+            <input type="text" name="filterSurname" placeholder="Введите фамилию пользователя" width="10">
+        </label>
+        <button type="submit">Найти</button>
+        <input type="hidden" th:value="${_csrf.token}" th:name="_csrf"/>
+    </form>
+    <a th:href="@{/bids/}">Перейти к редактированию заявок пользователей</a>
+    <form>
+        <div>Список пользователей</div>
+        <table>
+            <tr>
+                <th>Имя</th>
+                <th>Фамилия</th>
+                <th>Роли</th>
+                <th>Редактировать роли</th>
+            </tr>
+            <tr th:each="user: ${users}">
+                <td th:text="${user.name}">Имя пользователя</td>
+                <td th:text="${user.surname}">Фамилия пользователя</td>
+                <td th:text="${user.roles}">Роли</td>
+                <td><a th:href="@{/users/superUserPage/{id}(id=${user.id})}">Редактировать</a></td>
+            </tr>
+        </table>
+    </form>
+
+
+</div>
+</body>
+</html>

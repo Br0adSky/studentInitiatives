@@ -12,6 +12,6 @@ import java.util.List;
 public interface BidRepository extends JpaRepository<Bid, Integer> {
     List<Bid> findBidByAuthor(User author);
     List<Bid> findBidByTextContaining(String text);
-    @Query("select b from Bid b WHERE b.author.name like %:name% and b.author.surname like %:surname% ")
+    @Query("select b from Bid b where b.author.name like %:name% and b.author.surname like %:surname% ")
     List<Bid> findByNameAndSurnameContains(String name, String surname);
 }
