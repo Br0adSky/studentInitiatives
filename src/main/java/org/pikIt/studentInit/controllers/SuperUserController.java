@@ -10,6 +10,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
+import javax.servlet.http.HttpServletRequest;
 import java.util.Arrays;
 import java.util.Map;
 import java.util.Set;
@@ -31,7 +32,9 @@ public class SuperUserController {
     @GetMapping("{user}")
     public String userEdit(@PathVariable User user, Model model) {
         model.addAttribute("user2", user);
+        model.addAttribute("userRoles", user.getRoles().toArray());
         model.addAttribute("roles", Role.values());
+
         return "users/userEdit";
     }
 

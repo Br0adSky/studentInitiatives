@@ -43,6 +43,7 @@ public class BidController {
     static void replaceBidList(Model model, BidRepository bidRepository){
         model.addAttribute("message", "Все текущие заявки и их статус");
         model.addAttribute("bids", bidRepository.findAll());
+
     }
     @PreAuthorize("hasAuthority('USER')")
     @GetMapping("/addNewBid")

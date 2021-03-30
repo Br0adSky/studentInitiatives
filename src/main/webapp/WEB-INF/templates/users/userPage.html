@@ -44,17 +44,19 @@
                 <th>Адрес</th>
                 <th>Цена от</th>
                 <th>Цена до</th>
-                <th>Редактировать заявку</th>
+                <th>Редактирование</th>
+                <th>Голосование</th>
             </tr>
             <tr th:each="bid: ${bids}">
                 <td th:text="${bid.author.getName()}"></td>
                 <td th:text="${bid.author.getSurname()}"></td>
                 <td th:text="${bid.text}"></td>
                 <td th:text="${bid.status}"></td>
-                <td th:text="${bid.address}?: 'Не указан'"></td>
-                <td th:text="${bid.priseFrom}?: 'Неизвестно'"></td>
-                <td th:text="${bid.priseTo}?: 'Неизвестно'"></td>
-                <td> <a th:href="@{/users/userPage/{id}(id=${bid.id})}">Редактировать</a></td>
+                <td><span th:text="${bid.address}">Не указан</span></td>
+                <td><span th:text="${bid.priseFrom}">Неизвестно</span></td>
+                <td><span th:text="${bid.priseTo}">Неизвестно</span></td>
+                <td><span th:if="${bid.author == user}"><a th:href="@{userPage/{id}(id=${bid.id})}">Редактировать</a></span></td>
+                <td th:if="${bid.status == studGroup}"><a th:href="@{/votes/votingStud/{id}(id=${bid.id})}">Голосовать</a></td>
             </tr>
         </table>
     </form>

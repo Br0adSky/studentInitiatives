@@ -3,7 +3,9 @@ package org.pikIt.studentInit.controllers;
 import org.pikIt.studentInit.model.Bid;
 import org.pikIt.studentInit.model.BidStatus;
 import org.pikIt.studentInit.model.User;
+import org.pikIt.studentInit.model.Vote;
 import org.pikIt.studentInit.services.BidRepository;
+import org.pikIt.studentInit.services.VotingRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -19,19 +21,75 @@ import javax.validation.Valid;
 @PreAuthorize("hasAuthority('USER')")
 @RequestMapping("users/userPage")
 public class UserController {
-
-
+    private final Integer VOTES_FOR = 200;
+    private final Integer VOTES_AGAINST = 200;
     private BidRepository bidRepository;
+    private VotingRepository votingRepository;
+
+    static void votingFor(User user, boolean yes, Bid bid, VotingRepository votingRepository, Integer VOTES_FOR) {
+        Vote vote;
+        if (yes) {
+            if (votingRepository.findVoteByUserAndBid(user, bid) == null) {
+                vote = new Vote(bid, user);
+
+            } else {
+                vote = votingRepository.findVoteByUserAndBid(user, bid);
+                vote.setVotesAgainst(null);
+            }
+            vote.setVotesFor(1);
+            votingRepository.save(vote);
+            if (votingRepository.sumVotesFor() != null && votingRepository.sumVotesFor() >= VOTES_FOR) {
+                bid.setStatus(BidStatus.Голосование_эксперт_состав);
+            }
+        }
+    }
+
+    static void votingAgainst(User user, boolean no, Bid bid, VotingRepository votingRepository, Integer VOTES_AGAINST) {
+        Vote vote;
+        if (no) {
+            if (votingRepository.findVoteByUserAndBid(user, bid) == null) {
+                vote = new Vote(bid, user);
+
+            } else {
+                vote = votingRepository.findVoteByUserAndBid(user, bid);
+                vote.setVotesFor(null);
+            }
+            vote.setVotesAgainst(1);
+            votingRepository.save(vote);
+            if (votingRepository.sumVotesAgainst() != null && votingRepository.sumVotesAgainst() >= VOTES_AGAINST) {
+                bid.setStatus(BidStatus.Модерация);
+            }
+        }
+    }
+
+
+    @Autowired
+    public void setVotingRepository(VotingRepository votingRepository) {
+        this.votingRepository = votingRepository;
+    }
 
     @Autowired
     public void setBidRepository(BidRepository bidRepository) {
         this.bidRepository = bidRepository;
     }
 
+    @PostMapping("/studVoteFor")
+    public String studentVotingFor(@AuthenticationPrincipal User user, @RequestParam boolean yes, @RequestParam Bid bid) {
+        votingFor(user, yes, bid, votingRepository, VOTES_FOR);
+        return "redirect:/users/userPage";
+    }
+
+    @PostMapping("/studVoteAgainst")
+    public String studentVotingAgainst(@AuthenticationPrincipal User user, @RequestParam boolean no, @RequestParam Bid bid) {
+        votingAgainst(user, no, bid, votingRepository, VOTES_AGAINST);
+        return "redirect:/users/userPage";
+    }
 
     @GetMapping()
-    public String main(Model model) {
+    public String main(Model model, @AuthenticationPrincipal User user) {
         BidController.replaceBidList(model, bidRepository);
+        model.addAttribute("studGroup", BidStatus.Голосование_студ_состав);
+        model.addAttribute("user", user);
         return "users/userPage";
     }
 
@@ -112,5 +170,6 @@ public class UserController {
         BidController.saveBid(text, bid, bidRepository);
         return "redirect:/users/userPage";
     }
+
 
 }
