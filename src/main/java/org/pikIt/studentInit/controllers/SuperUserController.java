@@ -2,7 +2,6 @@ package org.pikIt.studentInit.controllers;
 
 import org.pikIt.studentInit.model.Role;
 import org.pikIt.studentInit.model.User;
-import org.pikIt.studentInit.services.BidRepository;
 import org.pikIt.studentInit.services.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -10,7 +9,6 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
-import javax.servlet.http.HttpServletRequest;
 import java.util.Arrays;
 import java.util.Map;
 import java.util.Set;
@@ -21,7 +19,6 @@ import java.util.stream.Collectors;
 @PreAuthorize("hasAuthority('SUPER_USER')")
 public class SuperUserController {
     private UserRepository userRepository;
-    private BidRepository bidRepository;
 
     @GetMapping
     public String userList(Model model) {

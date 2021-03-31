@@ -5,7 +5,7 @@
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
 </head>
 <body>
-<div>Поиск заявок пользователя</div>
+<div>Поиск заявок по тексту</div>
 <form method="post" action="/users/expertPage/filterText">
     <label>
         <input type="text" name="filterText" placeholder="Введите текст заявки">
@@ -38,6 +38,7 @@
             <th>Цена до</th>
             <th>Редактирование</th>
             <th>Голосование</th>
+            <th>Прикрепленные файлы</th>
         </tr>
         <tr th:each="bid: ${bids}">
             <td th:text="${bid.author.getName()}"></td>
@@ -56,6 +57,7 @@
                 <span th:unless="${bid.author == user}">Редактировать можно только свои заявки</span>
             </td>
             <td><a th:href="@{/votes/votingExpert/{id}(id=${bid.id})}">Голосовать</a></td>
+            <td> <a th:href="@{/users/userPage/getFile/{fileName}(fileName = ${bid.fileName})}" th:text="${bid.fileName}"></a></td>
         </tr>
     </table>
 </form>

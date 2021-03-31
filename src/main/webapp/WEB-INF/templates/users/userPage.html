@@ -40,7 +40,11 @@
         <div>Отобразить все заявки</div>
         <button type="submit">Отобразить</button>
     </form>
-
+    <form method="post" action="/users/userPage/studVotes">
+        <div>Отобразить все голосования</div>
+        <button type="submit">Отобразить</button>
+        <input type="hidden" th:value="${_csrf.token}" th:name="_csrf"/>
+    </form>
     <form method="post" action="/users/userPage/allBidsByName">
         <div>Все мои заявки</div>
         <button type="submit">Отобразить</button>
@@ -57,6 +61,7 @@
                 <th>Цена до</th>
                 <th>Редактирование</th>
                 <th>Голосование</th>
+                <th>Файл</th>
             </tr>
             <tr th:each="bid: ${bids}">
                 <td th:text="${bid.author.getName()}"></td>
@@ -76,8 +81,9 @@
                         th:href="@{userPage/{id}(id=${bid.id})}">Редактировать</a></span>
                     <span th:unless="${bid.author == user}">Редактировать можно только свои заявки</span>
                 </td>
-                <td th:if="${bid.status.name() == 'Голосование_студ_состав'}"><a
-                        th:href="@{/votes/votingStud/{id}(id=${bid.id})}">Голосовать</a></td>
+                <td> <span th:if="${bid.status.name() == 'Голосование_студ_состав'}"><a
+                        th:href="@{/votes/votingStud/{id}(id=${bid.id})}">Голосовать</a> </span></td>
+                <td> <a th:href="@{userPage/getFile/{fileName}(fileName = ${bid.fileName})}" th:text="${bid.fileName}"></a></td>
             </tr>
         </table>
     </form>

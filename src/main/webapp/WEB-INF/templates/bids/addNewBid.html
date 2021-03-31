@@ -5,11 +5,12 @@
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
 </head>
 <body>
-<form method="post" action="/users/userPage/addBid">
+<form method="post" action="/users/userPage/addBid" enctype="multipart/form-data">
     <label><input type="text" name="text" placeholder="Введите текст заявки">
-        <input type="" name="priseFrom" placeholder="Цена от">
+        <input type="text" name="priseFrom" placeholder="Цена от">
         <input type="text" name="priseTo" placeholder="Цена до">
         <input type="text" name="address" placeholder="Введите адрес исполнения заявки">
+        <input type="file" name="file" placeholder="Добавьте файл">
     </label>
     <button type="submit">Добавить заявку</button>
     <input type="hidden" th:value="${_csrf.token}" th:name="_csrf"/>

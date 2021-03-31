@@ -3,6 +3,7 @@ package org.pikIt.studentInit.model;
 
 import javax.validation.Valid;
 import lombok.Data;
+import org.springframework.web.multipart.MultipartFile;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
@@ -21,6 +22,7 @@ public class Bid {
     @Valid
     private Integer priseTo;
     private String address;
+    private String fileName;
 
     @CollectionTable(name = "bid_status", joinColumns = @JoinColumn(name = "bid_id"))
     @Enumerated(EnumType.STRING)

@@ -10,20 +10,22 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 
 @Controller
 @PreAuthorize("hasAuthority('EXPERT')")
 public class ExpertController {
-    private VotingRepository votingRepository;
-    private BidRepository bidRepository;
     private final Integer VOTES_FOR = 200;
     private final Integer VOTES_AGAINST = 200;
+    private VotingRepository votingRepository;
+    private BidRepository bidRepository;
 
     @GetMapping("users/expertPage")
-    public String main(Model model,@AuthenticationPrincipal User user){
-        model.addAttribute("message", "Все доступные заявки");
-        model.addAttribute("bids", bidRepository.findByStatus(BidStatus.Голосование_эксперт_состав));
+    public String main(Model model, @AuthenticationPrincipal User user) {
+        UserController.allAvailableVotes(model, bidRepository, BidStatus.Голосование_эксперт_состав);
         model.addAttribute("user", user);
         return "users/expertPage";
     }
@@ -47,10 +49,11 @@ public class ExpertController {
     }
 
     @PostMapping("users/expertPage/replaceBids")
-    public String replaceBids(Model model, @AuthenticationPrincipal User user){
+    public String replaceBids(Model model, @AuthenticationPrincipal User user) {
         main(model, user);
         return "users/expertPage";
     }
+
     @PostMapping("users/expertPage/filterText")
     public String filterText(@RequestParam String filterText,
                              Model model) {
@@ -62,14 +65,16 @@ public class ExpertController {
     public String allBidsByName(
             @AuthenticationPrincipal User user,
             Model model) {
-        UserController.allBidsByName(model,bidRepository,user);
+        UserController.allBidsByName(model, bidRepository, user);
         return "users/expertPage";
     }
+
     @PostMapping("users/expertPage/expertVoteFor")
     public String expertVotingFor(@AuthenticationPrincipal User user, @RequestParam boolean yes, @RequestParam Bid bid) {
         UserController.votingFor(user, yes, bid, votingRepository, VOTES_FOR);
         return "redirect:/users/expertPage";
     }
+
     @PostMapping("users/expertPage/expertVoteAgainst")
     public String expertVotingAgainst(@AuthenticationPrincipal User user, @RequestParam boolean no, @RequestParam Bid bid) {
         UserController.votingAgainst(user, no, bid, votingRepository, VOTES_AGAINST);
