@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="ru">
+<head>
+    <title>Main Page</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+</head>
+<body>
+<div>Поиск заявок пользователя</div>
+<form method="post" action="/users/expertPage/filterText">
+    <label>
+        <input type="text" name="filterText" placeholder="Введите текст заявки">
+    </label>
+    <button type="submit">Найти</button>
+    <button type="reset">Очистить введенные данные</button>
+    <input type="hidden" th:value="${_csrf.token}" th:name="_csrf"/>
+</form>
+<form method="post" action="/users/expertPage/replaceBids">
+    <div>Отобразить все заявки</div>
+    <button type="submit">Отобразить</button>
+    <input type="hidden" th:value="${_csrf.token}" th:name="_csrf"/>
+</form>
+<form method="get" action="/users/userPage">
+    <div>Вернуться на главную</div>
+    <button type="submit">Вернуться</button>
+</form>
+<form method="post" action="/users/expertPage/allBidsByName">
+    <div>Все мои заявки</div>
+    <button type="submit">Отобразить</button>
+    <input type="hidden" th:value="${_csrf.token}" th:name="_csrf"/>
+    <div th:text="${message}"></div>
+    <table>
+        <tr>
+            <th>Имя Студента</th>
+            <th>Фамилия Студента</th>
+            <th>Текст заявки</th>
+            <th>Адрес</th>
+            <th>Цена от</th>
+            <th>Цена до</th>
+            <th>Редактирование</th>
+            <th>Голосование</th>
+        </tr>
+        <tr th:each="bid: ${bids}">
+            <td th:text="${bid.author.getName()}"></td>
+            <td th:text="${bid.author.getSurname()}"></td>
+            <td th:text="${bid.text}"></td>
+            <td><span th:if="${bid.address.isBlank()}">Неизвестно</span>
+                <span th:unless="${bid.address.isBlank()}"><span th:text="${bid.address}"></span></span>
+            </td>
+            <td><span th:if="${bid.getPriseFrom()==null}">Неизвестно</span>
+                <span th:unless="${bid.getPriseFrom() == null}"><span th:text="${bid.getPriseFrom()}"></span></span>
+            </td>
+            <td><span th:if="${bid.getPriseTo()==null}">Неизвестно</span>
+                <span th:unless="${bid.getPriseTo()==null}"><span th:text="${bid.getPriseTo()}"></span></span>
+            </td>
+            <td><span th:if="${bid.author == user}"><a th:href="@{userPage/{id}(id=${bid.id})}">Редактировать</a></span>
+                <span th:unless="${bid.author == user}">Редактировать можно только свои заявки</span>
+            </td>
+            <td><a th:href="@{/votes/votingExpert/{id}(id=${bid.id})}">Голосовать</a></td>
+        </tr>
+    </table>
+</form>
+</body>
+</html>

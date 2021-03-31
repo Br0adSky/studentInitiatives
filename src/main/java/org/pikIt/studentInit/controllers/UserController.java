@@ -1,9 +1,6 @@
 package org.pikIt.studentInit.controllers;
 
-import org.pikIt.studentInit.model.Bid;
-import org.pikIt.studentInit.model.BidStatus;
-import org.pikIt.studentInit.model.User;
-import org.pikIt.studentInit.model.Vote;
+import org.pikIt.studentInit.model.*;
 import org.pikIt.studentInit.services.BidRepository;
 import org.pikIt.studentInit.services.VotingRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -62,6 +59,11 @@ public class UserController {
         }
     }
 
+    static void allBidsByName(Model model, BidRepository bidRepository, User user){
+        model.addAttribute("message", "Все Ваши заявки");
+        model.addAttribute("bids", bidRepository.findBidByAuthor(user));
+    }
+
 
     @Autowired
     public void setVotingRepository(VotingRepository votingRepository) {
@@ -88,8 +90,24 @@ public class UserController {
     @GetMapping()
     public String main(Model model, @AuthenticationPrincipal User user) {
         BidController.replaceBidList(model, bidRepository);
-        model.addAttribute("studGroup", BidStatus.Голосование_студ_состав);
         model.addAttribute("user", user);
+        if(user.getRoles().contains(Role.SUPER_USER)){
+            model.addAttribute("page", "/users/superUserPage");
+            model.addAttribute("text","Перейти в личный кабинет");
+        }
+        else if(user.getRoles().contains(Role.MODERATOR)){
+            model.addAttribute("text","Перейти в личный кабинет");
+            model.addAttribute("page", "/bids");
+        }
+        else if(user.getRoles().contains(Role.EXPERT)){
+            model.addAttribute("page", "/users/expertPage");
+            model.addAttribute("text","Перейти в личный кабинет");
+        }
+        else{
+            model.addAttribute("page","");
+            model.addAttribute("text","");
+        }
+        model.addAttribute("studGroup", BidStatus.Голосование_студ_состав);
         return "users/userPage";
     }
 
@@ -100,10 +118,10 @@ public class UserController {
 
     @PostMapping("/addBid")
     public String addBid(@AuthenticationPrincipal User user,
-                         @Valid @RequestParam String text,
-                         @Valid @RequestParam Integer priseFrom,
-                         @Valid @RequestParam Integer priseTo,
-                         @Valid @RequestParam String address,
+                         @RequestParam String text,
+                         @RequestParam Integer priseFrom,
+                         @RequestParam Integer priseTo,
+                         @RequestParam String address,
                          BindingResult bindingResult,
                          Model model) {
         if (bindingResult.hasErrors()) {
@@ -121,9 +139,6 @@ public class UserController {
         bidRepository.save(bid);
         model.addAttribute("bids", bidRepository.findAll());
 
-//        if (text != null && !text.isBlank()) {
-//
-//        }
         return "users/userPage";
     }
 
@@ -147,11 +162,14 @@ public class UserController {
     public String allBidsByName(
             @AuthenticationPrincipal User user,
             Model model) {
-        model.addAttribute("message", "Все Ваши заявки");
-        model.addAttribute("bids", bidRepository.findBidByAuthor(user));
+        allBidsByName(model,bidRepository,user);
         return "users/userPage";
     }
-
+    @PostMapping("/expert")
+    public String expert(Model model) {
+        model.addAttribute("bids", bidRepository.findByStatus(BidStatus.Голосование_эксперт_состав));
+        return "users/userPage";
+    }
     @GetMapping("/{bid}")
     public String bidEditForm(@AuthenticationPrincipal User user,
                               @PathVariable Bid bid, Model model) {

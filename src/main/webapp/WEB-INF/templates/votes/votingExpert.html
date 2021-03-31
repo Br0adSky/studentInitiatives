@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="ru">
+<head>
+    <title>Voting</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+</head>
+<body>
+<form method="post" action="/users/expertPage/expertVoteFor">
+    <label><input type="radio" th:text="За" th:name="yes"></label>
+    <input type="hidden" th:value="${bidExpertVote.id}" th:name="bid"/>
+    <button type="submit">Проголосовать</button>
+    <input type="hidden" th:value="${_csrf.token}" th:name="_csrf"/>
+</form>
+<form method="post" action="/users/expertPage/expertVoteAgainst">
+    <label><input type="radio" th:text="Против" th:name="no"></label>
+    <input type="hidden" th:value="${bidExpertVote.id}" th:name="bid"/>
+    <button type="submit">Проголосовать</button>
+    <input type="hidden" th:value="${_csrf.token}" th:name="_csrf"/>
+</form>
+</body>
+</html>
