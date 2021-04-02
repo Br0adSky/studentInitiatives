@@ -2,7 +2,7 @@ package org.pikIt.studentInit.controllers;
 
 import org.pikIt.studentInit.model.*;
 import org.pikIt.studentInit.services.BidRepository;
-import org.pikIt.studentInit.services.MediaTypeUtils;
+import org.pikIt.studentInit.services.MediaTypeService;
 import org.pikIt.studentInit.services.VotingRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
@@ -30,7 +30,6 @@ public class UserController {
     private final ServletContext context;
     private final BidRepository bidRepository;
     private final VotingRepository votingRepository;
-    private String UPLOAD_PATH = File.separator + "uploadedFiles" + File.separator;
 
     @Autowired
     public UserController(ServletContext context, VotingRepository votingRepository, BidRepository bidRepository) {
@@ -39,8 +38,25 @@ public class UserController {
         this.bidRepository = bidRepository;
 
     }
+    static void main(Model model, BidRepository bidRepository, User user){
+        model.addAttribute("message", "Все текущие заявки и их статус");
+        model.addAttribute("bids", bidRepository.findAll());
+        model.addAttribute("user", user);
+        model.addAttribute("text", "Перейти в личный кабинет");
+        if (user.getRoles().contains(Role.SUPER_USER)) {
+            model.addAttribute("page", "/users/superUserPage");
+        } else if (user.getRoles().contains(Role.MODERATOR)) {
+            model.addAttribute("page", "/bids");
+        } else if (user.getRoles().contains(Role.EXPERT)) {
+            model.addAttribute("page", "/users/expertPage");
+        } else {
+            model.addAttribute("page", "");
+            model.addAttribute("text", "");
+        }
+        model.addAttribute("studGroup", BidStatus.Голосование_студ_состав);
+    }
 
-    static void votingFor(User user, boolean yes, Bid bid, VotingRepository votingRepository, Integer VOTES_FOR) {
+    static void votingFor(User user, boolean yes, Bid bid, VotingRepository votingRepository, Integer VOTES_FOR, BidStatus status) {
         Vote vote;
         if (yes) {
             if (votingRepository.findVoteByUserAndBid(user, bid) == null) {
@@ -53,12 +69,12 @@ public class UserController {
             vote.setVotesFor(1);
             votingRepository.save(vote);
             if (votingRepository.sumVotesFor() != null && votingRepository.sumVotesFor() >= VOTES_FOR) {
-                bid.setStatus(BidStatus.Голосование_эксперт_состав);
+                bid.setStatus(status);
             }
         }
     }
 
-    static void votingAgainst(User user, boolean no, Bid bid, VotingRepository votingRepository, Integer VOTES_AGAINST) {
+    static void votingAgainst(User user, boolean no, Bid bid, VotingRepository votingRepository, Integer VOTES_AGAINST, BidRepository bidRepository) {
         Vote vote;
         if (no) {
             if (votingRepository.findVoteByUserAndBid(user, bid) == null) {
@@ -71,7 +87,10 @@ public class UserController {
             vote.setVotesAgainst(1);
             votingRepository.save(vote);
             if (votingRepository.sumVotesAgainst() != null && votingRepository.sumVotesAgainst() >= VOTES_AGAINST) {
-                bid.setStatus(BidStatus.Модерация);
+                for(Vote v : votingRepository.findVoteByBid(bid)){
+                    votingRepository.delete(v);
+                }
+                bidRepository.delete(bid);
             }
         }
     }
@@ -81,42 +100,32 @@ public class UserController {
         model.addAttribute("bids", bidRepository.findBidByAuthor(user));
     }
 
-    static void allAvailableVotes(Model model, BidRepository bidRepository, BidStatus bidStatus){
-        model.addAttribute("message","Доступные голосования");
-        model.addAttribute("bids",bidRepository.findByStatus(bidStatus));
+    static void replaceBidsByStatus(Model model, BidRepository bidRepository, BidStatus bidStatus) {
+        model.addAttribute("bids", bidRepository.findByStatus(bidStatus));
     }
 
     @PostMapping("/studVoteFor")
     public String studentVotingFor(@AuthenticationPrincipal User user, @RequestParam boolean yes, @RequestParam Bid bid) {
-        votingFor(user, yes, bid, votingRepository, VOTES_FOR);
+        votingFor(user, yes, bid, votingRepository, VOTES_FOR, BidStatus.Голосование_эксперт_состав);
         return "redirect:/users/userPage";
     }
 
     @PostMapping("/studVoteAgainst")
     public String studentVotingAgainst(@AuthenticationPrincipal User user, @RequestParam boolean no, @RequestParam Bid bid) {
-        votingAgainst(user, no, bid, votingRepository, VOTES_AGAINST);
+        votingAgainst(user, no, bid, votingRepository, VOTES_AGAINST, bidRepository);
         return "redirect:/users/userPage";
     }
 
     @GetMapping()
     public String main(Model model, @AuthenticationPrincipal User user) {
-        BidController.replaceBidList(model, bidRepository);
-        model.addAttribute("user", user);
-        if (user.getRoles().contains(Role.SUPER_USER)) {
-            model.addAttribute("page", "/users/superUserPage");
-            model.addAttribute("text", "Перейти в личный кабинет");
-        } else if (user.getRoles().contains(Role.MODERATOR)) {
-            model.addAttribute("text", "Перейти в личный кабинет");
-            model.addAttribute("page", "/bids");
-        } else if (user.getRoles().contains(Role.EXPERT)) {
-            model.addAttribute("page", "/users/expertPage");
-            model.addAttribute("text", "Перейти в личный кабинет");
-        } else {
-            model.addAttribute("page", "");
-            model.addAttribute("text", "");
-        }
-        model.addAttribute("studGroup", BidStatus.Голосование_студ_состав);
+        main(model,bidRepository,user);
         return "users/userPage";
+    }
+
+    @PostMapping("/delete")
+    public String deleteBid(@RequestParam Bid bid){
+        bidRepository.delete(bid);
+        return "redirect:/users/userPage";
     }
 
     @GetMapping("/addNewBid")
@@ -133,13 +142,17 @@ public class UserController {
                          @RequestParam("file") MultipartFile file,
                          Model model) throws IOException {
         Bid bid = new Bid(text, user);
-        UPLOAD_PATH = context.getRealPath("") + UPLOAD_PATH;
-        FileCopyUtils.copy(file.getBytes(), new File(UPLOAD_PATH + file.getOriginalFilename()));
-        String fileName = file.getOriginalFilename();
+        if(file.getOriginalFilename()!=null){
+            String UPLOAD_PATH = context.getRealPath("") + File.separator + "uploadedFiles" + File.separator;
+            FileCopyUtils.copy(file.getBytes(), new File(UPLOAD_PATH + file.getOriginalFilename()));
+            String fileName = file.getOriginalFilename();
+            bid.setFileName(fileName);
+        }
+        else
+            bid.setFileName("Без файла");
         if (address == null) {
             bid.setAddress("Не указано");
         }
-        bid.setFileName(fileName);
         bid.setStatus(BidStatus.Новая);
         bid.setText(text);
         bid.setAddress(address);
@@ -154,9 +167,9 @@ public class UserController {
     @GetMapping("/getFile/{fileName}")
     public void getFile(@PathVariable String fileName, HttpServletResponse response) throws IOException {
 
-        MediaType mediaType = MediaTypeUtils.getMediaTypeForFileName(this.context, fileName);
-
-        File file = new File(context.getRealPath("") + UPLOAD_PATH + File.separator + fileName);
+        MediaType mediaType = MediaTypeService.getMediaTypeForFileName(this.context, fileName);
+        String UPLOAD_PATH = context.getRealPath("") + File.separator + "uploadedFiles" + File.separator;
+        File file = new File(UPLOAD_PATH + fileName);
         response.setContentType(mediaType.getType());
         response.setHeader(HttpHeaders.CONTENT_DISPOSITION, "attachment;filename=" + file.getName());
         response.setContentLength((int) file.length());
@@ -197,27 +210,24 @@ public class UserController {
     }
 
     @GetMapping("/{bid}")
-    public String bidEditForm(@AuthenticationPrincipal User user,
-                              @PathVariable Bid bid, Model model) {
-        if (user.getId().equals(bid.getAuthor().getId())) {
-            model.addAttribute("userBid", bid);
-            return "users/bidEditUser";
-        } else {
-            return "redirect:/users/userPage";
-        }
+    public String bidEditForm(@PathVariable Bid bid, Model model, @AuthenticationPrincipal User user) {
+        BidController.editForm(model, bid, user);
+        return "bids/bidEdit";
+
     }
 
     @PostMapping("/save")
     public String bidSave(
             @Valid @RequestParam String text,
-            @RequestParam Bid bid) {
-        BidController.saveBid(text, bid, bidRepository);
+            @RequestParam Bid bid, @RequestParam String address, @RequestParam Integer priseFrom, @RequestParam Integer priseTo) {
+        BidController.saveBid(text, bid, bidRepository, address, priseFrom, priseTo, BidStatus.Новая);
         return "redirect:/users/userPage";
     }
 
     @PostMapping("/studVotes")
-    public String replaceAvailableVotes(Model model){
-        allAvailableVotes(model, bidRepository, BidStatus.Голосование_студ_состав);
+    public String replaceAvailableVotes(Model model) {
+        replaceBidsByStatus(model, bidRepository, BidStatus.Голосование_студ_состав);
+        model.addAttribute("message", "Доступные голосования");
         return "users/userPage";
     }
 

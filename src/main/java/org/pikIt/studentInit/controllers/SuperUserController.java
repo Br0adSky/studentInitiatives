@@ -29,7 +29,7 @@ public class SuperUserController {
     @GetMapping("{user}")
     public String userEdit(@PathVariable User user, Model model) {
         model.addAttribute("user2", user);
-        model.addAttribute("userRoles", user.getRoles().toArray());
+        model.addAttribute("userRoles", user.getRoles());
         model.addAttribute("roles", Role.values());
 
         return "users/userEdit";

@@ -1,9 +1,13 @@
 package org.pikIt.studentInit.controllers;
 
 import org.pikIt.studentInit.model.Bid;
+import org.pikIt.studentInit.model.BidStatus;
+import org.pikIt.studentInit.model.Role;
+import org.pikIt.studentInit.model.User;
 import org.pikIt.studentInit.services.BidRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -35,38 +39,54 @@ public class BidController {
         }
     }
 
-    static void saveBid(@RequestParam String text,
-                        @RequestParam Bid bid, BidRepository bidRepository) {
+    static void saveBid(String text, Bid bid, BidRepository bidRepository,
+                        String address, Integer priseFrom, Integer priseTo, BidStatus status) {
         bid.setText(text);
+        bid.setAddress(address);
+        bid.setPriseFrom(priseFrom);
+        bid.setPriseTo(priseTo);
+        bid.setStatus(status);
         bidRepository.save(bid);
     }
-    static void replaceBidList(Model model, BidRepository bidRepository){
-        model.addAttribute("message", "Все текущие заявки и их статус");
-        model.addAttribute("bids", bidRepository.findAll());
 
+    static void editForm(Model model, Bid bid, User user) {
+        model.addAttribute("bid2", bid);
+        model.addAttribute("userRoles", user.getRoles());
+        model.addAttribute("moderator", Role.MODERATOR);
     }
+
     @PreAuthorize("hasAuthority('USER')")
     @GetMapping("/addNewBid")
-    public String addNew(){
+    public String addNew() {
         return "bids/addNewBid";
     }
+
     @GetMapping
     public String bidList(Model model) {
-        replaceBidList(model,bidRepository);
+        UserController.replaceBidsByStatus(model,bidRepository,BidStatus.Новая);
+        model.addAttribute("statuses", BidStatus.values());
         return "bids/bidList";
     }
 
+    @PostMapping("/delete")
+    public String deleteBid(@RequestParam Bid bid){
+        bidRepository.delete(bid);
+        return "redirect:/bids";
+    }
+
     @GetMapping("{bid}")
-    public String bidEditForm(@PathVariable Bid bid, Model model) {
-        model.addAttribute("bid2", bid);
+    public String bidEditForm(@PathVariable Bid bid, Model model, @AuthenticationPrincipal User user) {
+        editForm(model, bid, user);
+        bid.setStatus(BidStatus.Модерация);
+        bidRepository.save(bid);
         return "bids/bidEdit";
     }
 
     @PostMapping()
     public String bidSave(
             @Valid @RequestParam String text,
-            @RequestParam Bid bid) {
-        saveBid(text, bid, bidRepository);
+            @RequestParam Bid bid, @RequestParam String address, @RequestParam Integer priseFrom, @RequestParam Integer priseTo) {
+        saveBid(text, bid, bidRepository, address, priseFrom, priseTo, BidStatus.Голосование_студ_состав);
         return "redirect:/bids";
     }
 

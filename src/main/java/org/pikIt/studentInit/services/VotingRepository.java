@@ -20,4 +20,6 @@ public interface VotingRepository extends JpaRepository<Vote, Integer> {
 
     //    @Query("select v from Vote v where v.bid = :bid and v.user = :user")
     Vote findVoteByUserAndBid(User user, Bid bid);
+
+    List<Vote> findVoteByBid(Bid bid);
 }

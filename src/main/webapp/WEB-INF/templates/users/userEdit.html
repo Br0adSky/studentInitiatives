@@ -8,7 +8,12 @@
 <form action="/users/superUserPage/save" method="post">
     <label>
         <td th:each="role: ${roles}">
-            <input type="checkbox" th:name="${role}" th:text="${role.name()}">
+            <span th:if="${userRoles.contains(role)}">
+                <input type="checkbox" th:name="${role}" th:text="${role.name()}" checked>
+            </span>
+            <span th:unless="${userRoles.contains(role)}">
+                <input type="checkbox" th:name="${role}" th:text="${role.name()}">
+            </span>
         </td>
         <input th:type="hidden" th:value="${user2.id}" th:name="userId">
     </label>

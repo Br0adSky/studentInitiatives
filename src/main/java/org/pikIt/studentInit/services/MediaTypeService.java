@@ -4,7 +4,7 @@ import javax.servlet.ServletContext;
 
 import org.springframework.http.MediaType;
 
-public class MediaTypeUtils {
+public class MediaTypeService {
 
     // abc.zip
     // abc.pdf,..

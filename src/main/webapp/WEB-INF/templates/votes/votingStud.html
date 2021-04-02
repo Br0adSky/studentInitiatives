@@ -6,10 +6,18 @@
 </head>
 <body>
 <form method="post" action="/users/userPage/studVoteFor">
-    <label><input type="radio" th:text="За" th:name="yes"></label>
-    <input type="hidden" th:value="${bidStudVote.id}" th:name="bid"/>
-    <button type="submit">Проголосовать</button>
-    <input type="hidden" th:value="${_csrf.token}" th:name="_csrf"/>
+    <td>
+        <span th:if="~{yes}">
+            <input type="radio" th:text="За" th:name="yes" checked/>
+            <input type="hidden" th:value="${bidStudVote.id}" th:name="bid"/>
+            <button type="submit">Проголосовать</button>
+            <input type="hidden" th:value="${_csrf.token}" th:name="_csrf"/>
+        </span>
+        <span th:unless="~{yes}">
+
+        </span>
+
+    </td>
 </form>
 <form method="post" action="/users/userPage/studVoteAgainst">
     <label><input type="radio" th:text="Против" th:name="no"></label>

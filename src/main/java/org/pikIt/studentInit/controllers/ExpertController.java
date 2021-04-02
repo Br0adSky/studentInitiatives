@@ -25,7 +25,8 @@ public class ExpertController {
 
     @GetMapping("users/expertPage")
     public String main(Model model, @AuthenticationPrincipal User user) {
-        UserController.allAvailableVotes(model, bidRepository, BidStatus.Голосование_эксперт_состав);
+        UserController.replaceBidsByStatus(model, bidRepository, BidStatus.Голосование_эксперт_состав);
+        model.addAttribute("message", "Доступные голосования");
         model.addAttribute("user", user);
         return "users/expertPage";
     }
@@ -71,13 +72,13 @@ public class ExpertController {
 
     @PostMapping("users/expertPage/expertVoteFor")
     public String expertVotingFor(@AuthenticationPrincipal User user, @RequestParam boolean yes, @RequestParam Bid bid) {
-        UserController.votingFor(user, yes, bid, votingRepository, VOTES_FOR);
+        UserController.votingFor(user, yes, bid, votingRepository, VOTES_FOR, BidStatus.Осуществление_работ);
         return "redirect:/users/expertPage";
     }
 
     @PostMapping("users/expertPage/expertVoteAgainst")
     public String expertVotingAgainst(@AuthenticationPrincipal User user, @RequestParam boolean no, @RequestParam Bid bid) {
-        UserController.votingAgainst(user, no, bid, votingRepository, VOTES_AGAINST);
+        UserController.votingAgainst(user, no, bid, votingRepository, VOTES_AGAINST, bidRepository);
         return "redirect:/users/expertPage";
     }
 
