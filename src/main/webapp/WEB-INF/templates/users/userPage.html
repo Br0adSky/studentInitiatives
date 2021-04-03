@@ -10,7 +10,7 @@
         <input type="submit" value="Выйти из аккаунта"/>
         <input type="hidden" th:value="${_csrf.token}" th:name="_csrf"/>
     </form>
-    <a href="/bids/addNewBid">Добавить новую заявку</a>
+    <a href = "#" th:href="@{/users/userPage/addNewBid}">Добавить новую заявку</a>
     <!--    Divide on roles -->
     <td>
         <a th:href="${page}" th:text="${text}"></a>
@@ -77,14 +77,14 @@
                 <td><span th:if="${bid.getPriseTo()==null}">Неизвестно</span>
                     <span th:unless="${bid.getPriseTo()==null}"><span th:text="${bid.getPriseTo()}"></span></span>
                 </td>
-                <td><span th:if="${bid.author == user && bid.status.name() == 'Новая'}"><a
+                <td><span th:if="${bid.author == user && bid.status.s == 'Новая'}"><a
                         th:href="@{userPage/{id}(id=${bid.id})}">Редактировать</a></span>
-                    <span th:unless="${bid.author == user && bid.status.name() == 'Новая'}">Редактировать можно только свои новые заявки</span>
+                    <span th:unless="${bid.author == user && bid.status.s == 'Новая'}">Редактировать можно только свои новые заявки</span>
                 </td>
-                <td> <span th:if="${bid.status.name() == 'Голосование_студ_состав'}"><a
+                <td> <span th:if="${bid.status.s == 'Голосование_студ_состав'}"><a
                         th:href="@{/votes/votingStud/{id}(id=${bid.id})}">Голосовать</a> </span></td>
-                <td><a th:href="@{userPage/getFile/{fileName}(fileName = ${bid.fileName})}"
-                       th:text="${bid.fileName}"></a></td>
+                <td><span th:if="${bid.fileName == null}">Без файла</span>
+                    <span th:unless="${bid.fileName == null}"><a th:href="@{userPage/getFile/{fileName}(fileName = ${bid.fileName})}" th:text="${bid.fileName}"></a></span></td>
             </tr>
         </table>
     </form>

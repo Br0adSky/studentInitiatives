@@ -12,7 +12,7 @@
         <input type="hidden" th:value="${_csrf.token}" th:name="_csrf"/>
     </form>
     <div>Поиск пользователей</div>
-    <form method="post" action="/bids/searchBidByAuthor">
+    <form method="post" action="/bids/bidList/searchBidByAuthor">
         <label>
             <input type="text" name="filterName" placeholder="Введите имя пользователя">
             <input type="text" name="filterSurname" placeholder="Введите фамилию пользователя">
@@ -21,12 +21,17 @@
         <input type="hidden" th:value="${_csrf.token}" th:name="_csrf"/>
     </form>
 
-    <form method="post" action="/bids/searchBidByText">
+    <form method="post" action="/bids/bidList/searchBidByText">
         <div>Поиск заявок по тексту</div>
         <label>
             <input type="text" name="filterText" placeholder="Введите название заявки">
         </label>
         <button type="submit">Найти</button>
+        <input type="hidden" th:value="${_csrf.token}" th:name="_csrf"/>
+    </form>
+
+    <form method="post" action="/bids/bidList/toUserPage">
+        <button type="submit">На главную</button>
         <input type="hidden" th:value="${_csrf.token}" th:name="_csrf"/>
     </form>
 
@@ -42,6 +47,7 @@
                 <th>Цена от</th>
                 <th>Цена до</th>
                 <th>Редактировать заявку</th>
+                <th>Файл</th>
             </tr>
             <tr th:each="bid: ${bids}">
                 <td th:text="${bid.author.name}">Имя пользователя</td>
@@ -51,7 +57,9 @@
                 <td th:text="${bid.address}"></td>
                 <td th:text="${bid.priseFrom}"></td>
                 <td th:text="${bid.priseTo}"></td>
-                <td> <a th:href="@{/bids/{id}(id=${bid.id})}">Редактировать</a></td>
+                <td> <a th:href="@{/bids/bidList/{id}(id=${bid.id})}">Редактировать</a></td>
+                <td><a th:href="@{userPage/getFile/{fileName}(fileName = ${bid.fileName})}"
+                       th:text="${bid.fileName}"></a></td>
             </tr>
         </table>
     </form>

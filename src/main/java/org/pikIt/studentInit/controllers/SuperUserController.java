@@ -35,6 +35,11 @@ public class SuperUserController {
         return "users/userEdit";
     }
 
+    @PostMapping("/toUserPage")
+    public String toUserPage(){
+        return "redirect:/users/userPage";
+    }
+
     @PostMapping("/save")
     public String userSave(
             @RequestParam Map<String, String> form,

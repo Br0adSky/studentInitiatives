@@ -7,7 +7,7 @@
 <body>
 <td>
     <span th:if="${userRoles.contains(moderator)}">
-        <form action="/bids" method="post" enctype="multipart/form-data">
+        <form action="/bids/bidList" method="post" enctype="multipart/form-data">
     <label>
         <input th:type="text" th:name="text" th:value="${bid2.text}">
         <input th:type="text" th:name="address" th:value="${bid2.address}" placeholder="Введите текст заявки">
@@ -16,9 +16,14 @@
         <input type="file" name="file" placeholder="Добавьте файл" th:value="${bid2.fileName}">
         <input th:type="hidden" th:value="${bid2.id}" th:name="bid">
     </label>
-    <input type="hidden" th:value="${_csrf.token}" th:name="_csrf"/>
-    <button type="submit">Сохранить</button>
-</form>
+            <input type="hidden" th:value="${_csrf.token}" th:name="_csrf"/>
+            <button type="submit">Сохранить</button>
+        </form>
+        <form action="/bids/bidList/delete" method="post">
+        <button type="submit">Удалить заявку</button>
+        <input type="hidden" th:value="${_csrf.token}" th:name="_csrf"/>
+        <input th:type="hidden" th:value="${bid2.id}" th:name="bid">
+    </form>
     </span>
     <span th:unless="${userRoles.contains(moderator)}">
         <form action="/users/userPage/save" method="post" enctype="multipart/form-data">
@@ -30,15 +35,15 @@
         <input type="file" name="file" placeholder="Добавьте файл" th:value="${bid2.fileName}">
         <input th:type="hidden" th:value="${bid2.id}" th:name="bid">
     </label>
-    <input type="hidden" th:value="${_csrf.token}" th:name="_csrf"/>
-    <button type="submit">Сохранить</button>
-</form>
+            <input type="hidden" th:value="${_csrf.token}" th:name="_csrf"/>
+            <button type="submit">Сохранить</button>
+        </form>
+        <form action="/users/userPage/delete" method="post">
+            <button type="submit">Удалить заявку</button>
+            <input type="hidden" th:value="${_csrf.token}" th:name="_csrf"/>
+            <input th:type="hidden" th:value="${bid2.id}" th:name="bid">
+        </form>
     </span>
-    <form action="/bids/delete" method="post">
-        <button type="submit">Удалить заявку</button>
-        <input type="hidden" th:value="${_csrf.token}" th:name="_csrf"/>
-        <input th:type="hidden" th:value="${bid2.id}" th:name="bid">
-    </form>
 </td>
 
 </body>

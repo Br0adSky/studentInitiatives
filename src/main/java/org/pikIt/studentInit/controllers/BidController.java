@@ -13,29 +13,37 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
+import java.util.Collections;
+import java.util.List;
 
 @Controller
-@RequestMapping("/bids")
+@RequestMapping("/bids/bidList")
 @PreAuthorize("hasAuthority('MODERATOR')")
 public class BidController {
     private BidRepository bidRepository;
 
-    static void searchByName(@RequestParam String filterName, @RequestParam String filterSurname, Model model, BidRepository bidRepository) {
+    static void searchByName(String filterName, String filterSurname, Model model, BidRepository bidRepository, List<BidStatus> statuses) {
         if (filterName != null && !filterName.isBlank() || filterSurname != null && !filterSurname.isBlank()) {
             model.addAttribute("bids", bidRepository.findByNameAndSurnameContains(filterName, filterSurname));
             model.addAttribute("message", "Заявки найденного пользователя");
         } else {
             model.addAttribute("message", "Пользователь не найден");
-            model.addAttribute("bids", bidRepository.findAll());
+            for(BidStatus status: statuses){
+                UserController.replaceBidsByStatus(model, bidRepository, status);
+            }
+
         }
     }
 
-    static void searchByText(@RequestParam String filterText, Model model, BidRepository bidRepository) {
+    static void searchByText(String filterText, Model model, BidRepository bidRepository, List<BidStatus> statuses) {
         model.addAttribute("message", "Заявки по введенному тексту");
         if (filterText != null && !filterText.isBlank()) {
             model.addAttribute("bids", bidRepository.findBidByTextContaining(filterText));
         } else {
-            model.addAttribute("bids", bidRepository.findAll());
+            model.addAttribute("message", "Заявка не найдена");
+            for(BidStatus status: statuses){
+                UserController.replaceBidsByStatus(model, bidRepository, status);
+            }
         }
     }
 
@@ -55,29 +63,29 @@ public class BidController {
         model.addAttribute("moderator", Role.MODERATOR);
     }
 
-    @PreAuthorize("hasAuthority('USER')")
-    @GetMapping("/addNewBid")
-    public String addNew() {
-        return "bids/addNewBid";
-    }
-
     @GetMapping
-    public String bidList(Model model) {
-        UserController.replaceBidsByStatus(model,bidRepository,BidStatus.Новая);
-        model.addAttribute("statuses", BidStatus.values());
+    public String bidList(Model model, @AuthenticationPrincipal User user) {
+        UserController.replaceBidsByStatus(model, bidRepository, BidStatus.New);
+        model.addAttribute("userRoles", user.getRoles());
+        model.addAttribute("superUser", Role.SUPER_USER);
         return "bids/bidList";
     }
 
+    @PostMapping("/toUserPage")
+    public String toUserPage() {
+        return "redirect:/users/userPage";
+    }
+
     @PostMapping("/delete")
-    public String deleteBid(@RequestParam Bid bid){
+    public String deleteBid(@RequestParam Bid bid) {
         bidRepository.delete(bid);
-        return "redirect:/bids";
+        return "redirect:/bids/bidList";
     }
 
     @GetMapping("{bid}")
     public String bidEditForm(@PathVariable Bid bid, Model model, @AuthenticationPrincipal User user) {
         editForm(model, bid, user);
-        bid.setStatus(BidStatus.Модерация);
+        bid.setStatus(BidStatus.Moderation);
         bidRepository.save(bid);
         return "bids/bidEdit";
     }
@@ -86,8 +94,8 @@ public class BidController {
     public String bidSave(
             @Valid @RequestParam String text,
             @RequestParam Bid bid, @RequestParam String address, @RequestParam Integer priseFrom, @RequestParam Integer priseTo) {
-        saveBid(text, bid, bidRepository, address, priseFrom, priseTo, BidStatus.Голосование_студ_состав);
-        return "redirect:/bids";
+        saveBid(text, bid, bidRepository, address, priseFrom, priseTo, BidStatus.Voting_stud);
+        return "redirect:/bids/bidList";
     }
 
     @PostMapping("/searchBidByAuthor")
@@ -95,7 +103,7 @@ public class BidController {
             @RequestParam String filterName,
             @RequestParam String filterSurname,
             Model model) {
-        searchByName(filterName, filterSurname, model, bidRepository);
+        searchByName(filterName, filterSurname, model, bidRepository, Collections.singletonList(BidStatus.New));
         return "bids/bidList";
     }
 
@@ -103,7 +111,7 @@ public class BidController {
     public String searchBidByText(
             @RequestParam String filterText,
             Model model) {
-        searchByText(filterText, model, bidRepository);
+        searchByText(filterText, model, bidRepository, Collections.singletonList(BidStatus.New));
         return "bids/bidList";
     }
 

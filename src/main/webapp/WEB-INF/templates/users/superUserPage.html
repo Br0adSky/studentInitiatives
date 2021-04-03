@@ -10,6 +10,10 @@
         <input type="submit" value="Выйти из аккаунта"/>
         <input type="hidden" th:value="${_csrf.token}" th:name="_csrf"/>
     </form>
+    <form method="post" action="/users/superUserPage/toUserPage">
+        <button type="submit">Вернуться на главную</button>
+        <input type="hidden" th:value="${_csrf.token}" th:name="_csrf"/>
+    </form>
     <div>Поиск пользователей</div>
     <form method="post" action="/users/superUserPage/searchUser">
         <label>
@@ -19,7 +23,8 @@
         <button type="submit">Найти</button>
         <input type="hidden" th:value="${_csrf.token}" th:name="_csrf"/>
     </form>
-    <a th:href="@{/bids/}">Перейти к редактированию заявок пользователей</a>
+    <a th:href="@{/bids/bidList}">Перейти в кабинет модератора</a>
+    <a th:href="@{/users/expertPage}">Перейти в кабинет эксперта</a>
     <form>
         <div>Список пользователей</div>
         <table>

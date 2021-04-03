@@ -5,13 +5,38 @@
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
 </head>
 <body>
-<form method="post" action="/users/userPage/addBid" enctype="multipart/form-data">
-    <label><input type="text" name="text" placeholder="Введите текст заявки">
-        <input type="text" name="priseFrom" placeholder="Цена от">
-        <input type="text" name="priseTo" placeholder="Цена до">
-        <input type="text" name="address" placeholder="Введите адрес исполнения заявки">
-        <input type="file" name="file" placeholder="Добавьте файл">
-    </label>
+<form action="#" method="post" th:action="@{/users/userPage/addNewBid}" enctype="multipart/form-data" th:object="${bid}">
+    <table>
+        <tr>
+            <td>Текст:</td>
+            <td>
+                <input type="text" th:field="*{text}" placeholder="Введите текст заявки">
+            <td th:if="${#fields.hasErrors('text')}" th:errors="*{text}"></td>
+        </tr>
+        <tr>
+            <td>Цена от:</td>
+            <td>
+                <input type="text" th:field="*{priseFrom}" placeholder="Цена от">
+            <td th:if="${#fields.hasErrors('priseFrom')}" th:errors="*{priseFrom}"></td>
+        </tr>
+        <tr>
+            <td>Цена до:</td>
+            <td>
+                <input type="text" th:field="*{priseTo}" placeholder="Цена до">
+            <td th:if="${#fields.hasErrors('priseTo')}" th:errors="*{priseTo}"></td>
+        </tr>
+        <tr>
+            <td>Адрес исполнения заявки:</td>
+            <td>
+                <input type="text" th:field="*{address}" placeholder="Введите адрес исполнения заявки">
+            <td th:if="${#fields.hasErrors('address')}" th:errors="*{address}"></td>
+        </tr>
+        <tr>
+            <td>Файл:</td>
+            <td>
+                <input type="file" name="file" placeholder="Добавьте файл">
+        </tr>
+    </table>
     <button type="submit">Добавить заявку</button>
     <input type="hidden" th:value="${_csrf.token}" th:name="_csrf"/>
 </form>

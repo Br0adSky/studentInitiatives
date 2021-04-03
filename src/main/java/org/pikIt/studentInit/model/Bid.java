@@ -1,12 +1,12 @@
 package org.pikIt.studentInit.model;
 
 
-import javax.validation.Valid;
 import lombok.Data;
-import org.springframework.web.multipart.MultipartFile;
+import org.hibernate.validator.constraints.Length;
+import org.pikIt.studentInit.services.BidStatusConverter;
 
 import javax.persistence.*;
-import javax.validation.constraints.NotNull;
+import javax.validation.constraints.*;
 
 @Data
 @Entity
@@ -14,18 +14,20 @@ public class Bid {
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE)
     private Integer id;
-    @NotNull
-    @Valid
+    @NotBlank(message = "Заполните поле текста")
+    @Length(max=2048, message = "Слишком много текста, отразите лишнее в приложенном файле")
     private String text;
-    @Valid
+
+    @Min(0)
+    @Max(1000000)
     private Integer priseFrom;
-    @Valid
+    @Min(0)
+    @Max(1000000)
     private Integer priseTo;
     private String address;
     private String fileName;
 
-    @CollectionTable(name = "bid_status", joinColumns = @JoinColumn(name = "bid_id"))
-    @Enumerated(EnumType.STRING)
+    @Convert(converter= BidStatusConverter.class)
     private BidStatus status;
 
 
@@ -42,8 +44,9 @@ public class Bid {
     public Bid() {
     }
 
-    public String getAuthorName() {
-        return author.getName();
+    @AssertFalse(message = "Введите корректный адрес или не вводите ничего")
+    public boolean isAddressBlank(){
+        return address.isBlank();
     }
 
 }

@@ -15,6 +15,8 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
+import java.util.Collections;
+
 @Controller
 @PreAuthorize("hasAuthority('EXPERT')")
 public class ExpertController {
@@ -25,7 +27,7 @@ public class ExpertController {
 
     @GetMapping("users/expertPage")
     public String main(Model model, @AuthenticationPrincipal User user) {
-        UserController.replaceBidsByStatus(model, bidRepository, BidStatus.Голосование_эксперт_состав);
+        UserController.replaceBidsByStatus(model, bidRepository, BidStatus.Voting_expert);
         model.addAttribute("message", "Доступные голосования");
         model.addAttribute("user", user);
         return "users/expertPage";
@@ -58,7 +60,7 @@ public class ExpertController {
     @PostMapping("users/expertPage/filterText")
     public String filterText(@RequestParam String filterText,
                              Model model) {
-        BidController.searchByText(filterText, model, bidRepository);
+        BidController.searchByText(filterText, model, bidRepository, Collections.singletonList(BidStatus.Voting_expert));
         return "users/expertPage";
     }
 
@@ -72,13 +74,13 @@ public class ExpertController {
 
     @PostMapping("users/expertPage/expertVoteFor")
     public String expertVotingFor(@AuthenticationPrincipal User user, @RequestParam boolean yes, @RequestParam Bid bid) {
-        UserController.votingFor(user, yes, bid, votingRepository, VOTES_FOR, BidStatus.Осуществление_работ);
+        UserController.votingFor(user, bid, votingRepository, VOTES_FOR, BidStatus.Working);
         return "redirect:/users/expertPage";
     }
 
     @PostMapping("users/expertPage/expertVoteAgainst")
     public String expertVotingAgainst(@AuthenticationPrincipal User user, @RequestParam boolean no, @RequestParam Bid bid) {
-        UserController.votingAgainst(user, no, bid, votingRepository, VOTES_AGAINST, bidRepository);
+        UserController.votingAgainst(user, bid, votingRepository, VOTES_AGAINST, bidRepository);
         return "redirect:/users/expertPage";
     }
 
