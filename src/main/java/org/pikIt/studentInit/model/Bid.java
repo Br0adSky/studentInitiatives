@@ -46,6 +46,9 @@ public class Bid {
 
     @AssertFalse(message = "Введите корректный адрес или не вводите ничего")
     public boolean isAddressBlank(){
+        if(address.isBlank()){
+            return address == null;
+        }
         return address.isBlank();
     }
 

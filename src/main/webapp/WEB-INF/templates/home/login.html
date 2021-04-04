@@ -11,7 +11,7 @@
     Вы вышли из аккаунта
 </div>
 <form th:action="@{/home}" method="post">
-    <div><label> Почта : <input type="text" name="username"/> </label></div>
+    <div><label> Почта : <input type="email" name="username"/> </label></div>
     <br>
     <div><label> Пароль: <input type="password" name="password"/> </label></div>
     <input type="hidden" th:value="${_csrf.token}" th:name="_csrf"/>

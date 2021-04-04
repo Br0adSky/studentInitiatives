@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="ru">
+<head>
+    <title>Voting</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+</head>
+<body>
+<td>
+    <span th:if="${student}">
+        <form method="post" action="/users/userPage/studVote">
+            <input type="radio" name="vote" id="yesS" value="yes">
+            <label for="yesS">Голосовать За</label>
+            <input type="radio" name="vote" id="noS" value="no">
+            <label for="noS">Голосовать Против</label>
+            <input type="hidden" th:value="${bidStudVote.id}" th:name="bid"/>
+            <button type="submit">Проголосовать</button>
+            <input type="hidden" th:value="${_csrf.token}" th:name="_csrf"/>
+        </form>
+    </span>
+    <span th:unless="${student}">
+        <form method="post" action="/users/expertPage/expertVote">
+            <input type="radio" name="vote" id="yesE" value="yes">
+            <label for="yesE">Голосовать За</label>
+            <input type="radio" name="vote" id="noE" value="no">
+            <label for="noE">Голосовать Против</label>
+            <input type="hidden" th:value="${bidExpertVote.id}" th:name="bid"/>
+            <button type="submit">Проголосовать</button>
+            <input type="hidden" th:value="${_csrf.token}" th:name="_csrf"/>
+        </form>
+    </span>
+</td>
+
+</body>
+</html>

@@ -44,7 +44,7 @@ public class UserController {
         UPLOAD_PATH = context.getRealPath("") + "uploadedFiles" + File.separator;
     }
 
-    static void createDefaultParams(Model model, User user){
+    static void createDefaultParams(Model model, User user) {
         model.addAttribute("message", "Все текущие заявки и их статус");
         model.addAttribute("user", user);
         model.addAttribute("text", "Перейти в личный кабинет");
@@ -61,39 +61,45 @@ public class UserController {
         model.addAttribute("studGroup", BidStatus.Voting_stud);
     }
 
-    static void votingFor(User user,  Bid bid, VotingRepository votingRepository, Integer VOTES_FOR, BidStatus status) {
+    static void votingFor(User user, Bid bid, VotingRepository votingRepository, Integer VOTES_FOR, BidStatus status, boolean yes, boolean no, Integer VOTES_AGAINST, BidRepository bidRepository) {
         Vote vote;
-        if (votingRepository.findVoteByUserAndBid(user, bid) == null) {
-            vote = new Vote(bid, user);
+        if (yes) {
+            if (votingRepository.findVoteByUserAndBid(user, bid) == null) {
+                vote = new Vote(bid, user);
 
-        } else {
-            vote = votingRepository.findVoteByUserAndBid(user, bid);
-            vote.setVotesAgainst(null);
+            } else {
+                vote = votingRepository.findVoteByUserAndBid(user, bid);
+                vote.setVotesAgainst(null);
+            }
+            vote.setVotesFor(1);
+            votingRepository.save(vote);
+            if (votingRepository.sumVotesFor() != null && votingRepository.sumVotesFor() >= VOTES_FOR) {
+                bid.setStatus(status);
+            }
         }
-        vote.setVotesFor(1);
-        votingRepository.save(vote);
-        if (votingRepository.sumVotesFor() != null && votingRepository.sumVotesFor() >= VOTES_FOR) {
-            bid.setStatus(status);
+        if (no) {
+            if (votingRepository.findVoteByUserAndBid(user, bid) == null) {
+                vote = new Vote(bid, user);
+
+            } else {
+                vote = votingRepository.findVoteByUserAndBid(user, bid);
+                vote.setVotesFor(null);
+            }
+            vote.setVotesAgainst(1);
+            votingRepository.save(vote);
+            if (votingRepository.sumVotesAgainst() != null && votingRepository.sumVotesAgainst() >= VOTES_AGAINST) {
+                for (Vote v : votingRepository.findVoteByBid(bid)) {
+                    votingRepository.delete(v);
+                }
+                bidRepository.delete(bid);
+            }
         }
+
     }
 
     static void votingAgainst(User user, Bid bid, VotingRepository votingRepository, Integer VOTES_AGAINST, BidRepository bidRepository) {
         Vote vote;
-        if (votingRepository.findVoteByUserAndBid(user, bid) == null) {
-            vote = new Vote(bid, user);
 
-        } else {
-            vote = votingRepository.findVoteByUserAndBid(user, bid);
-            vote.setVotesFor(null);
-        }
-        vote.setVotesAgainst(1);
-        votingRepository.save(vote);
-        if (votingRepository.sumVotesAgainst() != null && votingRepository.sumVotesAgainst() >= VOTES_AGAINST) {
-            for(Vote v : votingRepository.findVoteByBid(bid)){
-                votingRepository.delete(v);
-            }
-            bidRepository.delete(bid);
-            }
     }
 
     static void allBidsByName(Model model, BidRepository bidRepository, User user) {
@@ -105,15 +111,10 @@ public class UserController {
         model.addAttribute("bids", bidRepository.findByStatus(bidStatus));
     }
 
-    @PostMapping("/studVoteFor")
-    public String studentVotingFor(@AuthenticationPrincipal User user,  @RequestParam Bid bid) {
-        votingFor(user, bid, votingRepository, VOTES_FOR, BidStatus.Voting_expert);
-        return "redirect:/users/userPage";
-    }
-
-    @PostMapping("/studVoteAgainst")
-    public String studentVotingAgainst(@AuthenticationPrincipal User user, @RequestParam Bid bid) {
-        votingAgainst(user, bid, votingRepository, VOTES_AGAINST, bidRepository);
+    @PostMapping("/studVote")
+    public String studentVote(@AuthenticationPrincipal User user, @RequestParam Bid bid,
+                              @RequestParam(required = false) boolean yes, @RequestParam(required = false) boolean no) {
+        votingFor(user, bid, votingRepository, VOTES_FOR, BidStatus.Voting_expert, yes, no, VOTES_AGAINST, bidRepository);
         return "redirect:/users/userPage";
     }
 
@@ -133,7 +134,7 @@ public class UserController {
     }
 
     @PostMapping("/delete")
-    public String deleteBid(@RequestParam Bid bid){
+    public String deleteBid(@RequestParam Bid bid) {
         bidRepository.delete(bid);
         return "redirect:/users/userPage";
     }
@@ -143,14 +144,14 @@ public class UserController {
                          @Valid Bid bid,
                          BindingResult bindingResult,
                          Model model,
-                         @RequestParam("file") MultipartFile file) throws IOException {
+                         @RequestParam(value = "file") MultipartFile file) throws IOException {
         bid.setAuthor(user);
-        if(bindingResult.hasErrors()){
+        if (bindingResult.hasErrors()) {
             model.mergeAttributes(ControllerUtils.getErrorMap(bindingResult));
             model.addAttribute("bid", bid);
             return "bids/addNewBid";
-        } else{
-            if(!file.isEmpty()){
+        } else {
+            if (!file.isEmpty()) {
                 FileCopyUtils.copy(file.getBytes(), new File(UPLOAD_PATH + file.getOriginalFilename()));
                 String fileName = file.getOriginalFilename();
                 bid.setFileName(fileName);
@@ -159,8 +160,8 @@ public class UserController {
             bidRepository.save(bid);
         }
         model.addAttribute("bids", bidRepository.findAll());
-        createDefaultParams(model,user);
-        return "users/userPage";
+        createDefaultParams(model, user);
+        return "redirect:/users/userPage";
     }
 
     @GetMapping("/getFile/{fileName}")
@@ -187,7 +188,7 @@ public class UserController {
     public String filterText(@RequestParam String filterText,
                              Model model, @AuthenticationPrincipal User user) {
         BidController.searchByText(filterText, model, bidRepository, Arrays.asList(BidStatus.values().clone()));
-        createDefaultParams(model,user);
+        createDefaultParams(model, user);
         return "users/userPage";
     }
 
@@ -197,7 +198,7 @@ public class UserController {
             @RequestParam String filterSurname,
             Model model, @AuthenticationPrincipal User user) {
         BidController.searchByName(filterName, filterSurname, model, bidRepository, Arrays.asList(BidStatus.values().clone()));
-        createDefaultParams(model,user);
+        createDefaultParams(model, user);
         return "/users/userPage";
     }
 
@@ -206,7 +207,7 @@ public class UserController {
             @AuthenticationPrincipal User user,
             Model model) {
         allBidsByName(model, bidRepository, user);
-        createDefaultParams(model,user);
+        createDefaultParams(model, user);
         return "users/userPage";
     }
 
@@ -217,19 +218,11 @@ public class UserController {
 
     }
 
-    @PostMapping("/save")
-    public String bidSave(
-            @Valid @RequestParam String text,
-            @RequestParam Bid bid, @RequestParam String address, @RequestParam Integer priseFrom, @RequestParam Integer priseTo) {
-        BidController.saveBid(text, bid, bidRepository, address, priseFrom, priseTo, BidStatus.New);
-        return "redirect:/users/userPage";
-    }
-
     @PostMapping("/studVotes")
     public String replaceAvailableVotes(Model model, @AuthenticationPrincipal User user) {
         replaceBidsByStatus(model, bidRepository, BidStatus.Voting_stud);
         model.addAttribute("message", "Доступные голосования");
-        createDefaultParams(model,user);
+        createDefaultParams(model, user);
         return "users/userPage";
     }
 

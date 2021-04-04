@@ -2,6 +2,7 @@ package org.pikIt.studentInit.controllers;
 
 import org.pikIt.studentInit.model.Bid;
 import org.pikIt.studentInit.model.BidStatus;
+import org.pikIt.studentInit.model.Role;
 import org.pikIt.studentInit.model.User;
 import org.pikIt.studentInit.services.BidRepository;
 import org.pikIt.studentInit.services.VotingRepository;
@@ -39,16 +40,18 @@ public class ExpertController {
     }
 
     @PreAuthorize("hasAuthority('USER')")
-    @GetMapping("votes/votingStud/{bid}")
-    public String studentVoting(Model model, @PathVariable Bid bid) {
-        model.addAttribute("bidStudVote", bid);
-        return "votes/votingStud";
-    }
+    @GetMapping("votes/voting/{bid}")
+    public String voting(Model model, @PathVariable Bid bid, @AuthenticationPrincipal User user) {
+        if(user.getRoles().contains(Role.EXPERT) && bid.getStatus() == BidStatus.Voting_expert){
+            model.addAttribute("bidExpertVote", bid);
+            model.addAttribute("student", false);
+        }
+        else{
+            model.addAttribute("bidStudVote", bid);
+            model.addAttribute("student", true);
+        }
 
-    @GetMapping("votes/votingExpert/{bid}")
-    public String expertVoting(Model model, @PathVariable Bid bid) {
-        model.addAttribute("bidExpertVote", bid);
-        return "votes/votingExpert";
+        return "votes/voting";
     }
 
     @PostMapping("users/expertPage/replaceBids")
@@ -72,17 +75,13 @@ public class ExpertController {
         return "users/expertPage";
     }
 
-    @PostMapping("users/expertPage/expertVoteFor")
-    public String expertVotingFor(@AuthenticationPrincipal User user, @RequestParam boolean yes, @RequestParam Bid bid) {
-        UserController.votingFor(user, bid, votingRepository, VOTES_FOR, BidStatus.Working);
+    @PostMapping("users/expertPage/expertVote")
+    public String expertVoting(@AuthenticationPrincipal User user, @RequestParam Bid bid,
+                               @RequestParam(required = false) boolean yes, @RequestParam(required = false) boolean no) {
+        UserController.votingFor(user, bid, votingRepository, VOTES_FOR, BidStatus.Working, yes, no, VOTES_AGAINST, bidRepository);
         return "redirect:/users/expertPage";
     }
 
-    @PostMapping("users/expertPage/expertVoteAgainst")
-    public String expertVotingAgainst(@AuthenticationPrincipal User user, @RequestParam boolean no, @RequestParam Bid bid) {
-        UserController.votingAgainst(user, bid, votingRepository, VOTES_AGAINST, bidRepository);
-        return "redirect:/users/expertPage";
-    }
 
     @Autowired
     public void setVotingRepository(VotingRepository votingRepository) {

@@ -5,14 +5,21 @@ import org.pikIt.studentInit.model.BidStatus;
 import org.pikIt.studentInit.model.Role;
 import org.pikIt.studentInit.model.User;
 import org.pikIt.studentInit.services.BidRepository;
+import org.pikIt.studentInit.services.ControllerUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.util.FileCopyUtils;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import javax.servlet.ServletContext;
 import javax.validation.Valid;
+import java.io.File;
+import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
 
@@ -20,7 +27,13 @@ import java.util.List;
 @RequestMapping("/bids/bidList")
 @PreAuthorize("hasAuthority('MODERATOR')")
 public class BidController {
+    private final String UPLOAD_PATH;
     private BidRepository bidRepository;
+
+    @Autowired
+    public BidController(ServletContext context) {
+        UPLOAD_PATH = context.getRealPath("") + "uploadedFiles" + File.separator;
+    }
 
     static void searchByName(String filterName, String filterSurname, Model model, BidRepository bidRepository, List<BidStatus> statuses) {
         if (filterName != null && !filterName.isBlank() || filterSurname != null && !filterSurname.isBlank()) {
@@ -28,7 +41,7 @@ public class BidController {
             model.addAttribute("message", "Заявки найденного пользователя");
         } else {
             model.addAttribute("message", "Пользователь не найден");
-            for(BidStatus status: statuses){
+            for (BidStatus status : statuses) {
                 UserController.replaceBidsByStatus(model, bidRepository, status);
             }
 
@@ -41,20 +54,28 @@ public class BidController {
             model.addAttribute("bids", bidRepository.findBidByTextContaining(filterText));
         } else {
             model.addAttribute("message", "Заявка не найдена");
-            for(BidStatus status: statuses){
+            for (BidStatus status : statuses) {
                 UserController.replaceBidsByStatus(model, bidRepository, status);
             }
         }
     }
 
-    static void saveBid(String text, Bid bid, BidRepository bidRepository,
-                        String address, Integer priseFrom, Integer priseTo, BidStatus status) {
-        bid.setText(text);
-        bid.setAddress(address);
-        bid.setPriseFrom(priseFrom);
-        bid.setPriseTo(priseTo);
-        bid.setStatus(status);
-        bidRepository.save(bid);
+    static String saveBid(Bid bid, BindingResult bindingResult, Model model, BidRepository bidRepository,
+                          BidStatus status, String page, MultipartFile file, String UPLOAD_PATH) throws IOException {
+        if (bindingResult.hasErrors()) {
+            model.mergeAttributes(ControllerUtils.getErrorMap(bindingResult));
+            model.addAttribute("bid", bid);
+            return "bids/bidEdit";
+        } else {
+            if (!file.isEmpty()) {
+                FileCopyUtils.copy(file.getBytes(), new File(UPLOAD_PATH + file.getOriginalFilename()));
+                String fileName = file.getOriginalFilename();
+                bid.setFileName(fileName);
+            }
+            bid.setStatus(status);
+            bidRepository.save(bid);
+            return page;
+        }
     }
 
     static void editForm(Model model, Bid bid, User user) {
@@ -89,13 +110,13 @@ public class BidController {
         bidRepository.save(bid);
         return "bids/bidEdit";
     }
-
+    @PreAuthorize("hasAuthority('USER')")
     @PostMapping()
     public String bidSave(
-            @Valid @RequestParam String text,
-            @RequestParam Bid bid, @RequestParam String address, @RequestParam Integer priseFrom, @RequestParam Integer priseTo) {
-        saveBid(text, bid, bidRepository, address, priseFrom, priseTo, BidStatus.Voting_stud);
-        return "redirect:/bids/bidList";
+            @Valid Bid bid, BindingResult bindingResult, Model model, @RequestParam(required = false, value = "file") MultipartFile file, @AuthenticationPrincipal User user) throws IOException {
+        if(user.getRoles().contains(Role.MODERATOR))
+            return saveBid(bid, bindingResult, model, bidRepository, BidStatus.Voting_stud, "redirect:/bids/bidList", file, UPLOAD_PATH);
+        return BidController.saveBid(bid, bindingResult, model,bidRepository,BidStatus.New, "redirect:/users/userPage", file, UPLOAD_PATH);
     }
 
     @PostMapping("/searchBidByAuthor")
