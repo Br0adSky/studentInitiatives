@@ -1,4 +1,4 @@
-package org.pikIt.studentInit.services;
+package org.pikIt.studentInit.repositorys;
 
 import org.pikIt.studentInit.model.Bid;
 import org.pikIt.studentInit.model.User;

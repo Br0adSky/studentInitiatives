@@ -29,12 +29,17 @@
         <button type="submit">Найти</button>
         <input type="hidden" th:value="${_csrf.token}" th:name="_csrf"/>
     </form>
-
+    <br>
+    <form method="post" action="/bids/bidList/bidDone">
+        <button type="submit">Отобразить заявки, ожидающие подтверждения выполнения</button>
+        <input type="hidden" th:value="${_csrf.token}" th:name="_csrf"/>
+    </form>
+    <br>
     <form method="post" action="/bids/bidList/toUserPage">
         <button type="submit">На главную</button>
         <input type="hidden" th:value="${_csrf.token}" th:name="_csrf"/>
     </form>
-
+    <td th:text="${message}"></td>
     <form>
         <div>Список заявок пользователей</div>
         <table>
@@ -57,7 +62,14 @@
                 <td th:text="${bid.address}"></td>
                 <td th:text="${bid.priseFrom}"></td>
                 <td th:text="${bid.priseTo}"></td>
-                <td> <a th:href="@{/bids/bidList/{id}(id=${bid.id})}">Редактировать</a></td>
+                <td><span th:if="${bid.status.s == 'Осуществление_работ'}">
+                    <form method="get" th:action="@{/bids/bidList/bidDone}">
+                        <input type="hidden" th:value="${bid.id}" th:name="bid"/>
+                        <button type="submit">Подтвердить выполнение</button>
+                    </form>
+                </span><span th:unless="${bid.status.s == 'Осуществление_работ'}">
+                    <a th:href="@{/bids/bidList/{id}(id=${bid.id})}">Редактировать</a>
+                </span></td>
                 <td><a th:href="@{userPage/getFile/{fileName}(fileName = ${bid.fileName})}"
                        th:text="${bid.fileName}"></a></td>
             </tr>

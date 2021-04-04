@@ -78,7 +78,7 @@
                     <span th:unless="${bid.getPriseTo()==null}"><span th:text="${bid.getPriseTo()}"></span></span>
                 </td>
                 <td><span th:if="${bid.author == user && bid.status.s == 'Новая'}"><a
-                        th:href="@{/users/userPage/{id}(id=${bid.id})}">Редактировать</a></span>
+                        th:href="@{/bids/bidList/{id}(id=${bid.id})}">Редактировать</a></span>
                     <span th:unless="${bid.author == user && bid.status.s == 'Новая'}">Редактировать можно только свои новые заявки</span>
                 </td>
                 <td> <span th:if="${bid.status.s == 'Голосование_студ_состав'}"><a

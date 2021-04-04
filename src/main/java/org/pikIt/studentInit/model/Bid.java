@@ -6,7 +6,10 @@ import org.hibernate.validator.constraints.Length;
 import org.pikIt.studentInit.services.BidStatusConverter;
 
 import javax.persistence.*;
-import javax.validation.constraints.*;
+import javax.validation.constraints.AssertFalse;
+import javax.validation.constraints.Max;
+import javax.validation.constraints.Min;
+import javax.validation.constraints.NotBlank;
 
 @Data
 @Entity
@@ -15,7 +18,7 @@ public class Bid {
     @GeneratedValue(strategy = GenerationType.SEQUENCE)
     private Integer id;
     @NotBlank(message = "Заполните поле текста")
-    @Length(max=2048, message = "Слишком много текста, отразите лишнее в приложенном файле")
+    @Length(max = 2048, message = "Слишком много текста, отразите лишнее в приложенном файле")
     private String text;
 
     @Min(0)
@@ -27,7 +30,7 @@ public class Bid {
     private String address;
     private String fileName;
 
-    @Convert(converter= BidStatusConverter.class)
+    @Convert(converter = BidStatusConverter.class)
     private BidStatus status;
 
 
@@ -45,8 +48,8 @@ public class Bid {
     }
 
     @AssertFalse(message = "Введите корректный адрес или не вводите ничего")
-    public boolean isAddressBlank(){
-        if(address.isBlank()){
+    public boolean isAddressBlank() {
+        if (address.isBlank()) {
             return address == null;
         }
         return address.isBlank();

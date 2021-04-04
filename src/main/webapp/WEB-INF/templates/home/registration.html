@@ -5,14 +5,18 @@
 </head>
 <body>
 <div th:text="${message}"></div>
-<form th:action="@{/home/registration}" method="post">
-    <div><label> Почта : <input type="email" name="email"/> </label></div>
+<form th:action="@{/home/registration}" method="post" action="#" th:object="${user}">
+    <div><label> Почта : <input type="email" th:field="*{email}"/>
+        <td th:if="${#fields.hasErrors('email')}" th:errors="*{email}"></td></label></div>
     <br>
-    <div><label> Имя : <input type="text" name="name"/> </label></div>
+    <div><label> Имя : <input type="text" th:field="*{name}"/>
+        <td th:if="${#fields.hasErrors('name')}" th:errors="*{name}"></td></label></div>
     <br>
-    <div><label> Фамилия : <input type="text" name="surname"/> </label></div>
+    <div><label> Фамилия : <input type="text" th:field="*{surname}"/>
+        <td th:if="${#fields.hasErrors('surname')}" th:errors="*{surname}"></td></label></div>
     <br>
-    <div><label> Пароль: <input type="password" name="password"/> </label></div>
+    <div><label> Пароль: <input type="password" th:field="*{password}"/>
+        <td th:if="${#fields.hasErrors('password')}" th:errors="*{password}"></td></label></div>
     <br>
     <input type="hidden" th:value="${_csrf.token}" th:name="_csrf"/>
     <div><input type="submit" value="Зарегистрироваться"/></div>

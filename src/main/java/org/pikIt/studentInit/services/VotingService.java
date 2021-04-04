@@ -1,0 +1,70 @@
+package org.pikIt.studentInit.services;
+
+import org.pikIt.studentInit.model.*;
+import org.pikIt.studentInit.repositorys.BidRepository;
+import org.pikIt.studentInit.repositorys.VotingRepository;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.ui.Model;
+
+@Service
+public class VotingService {
+    private final VotingRepository votingRepository;
+    private final BidRepository bidRepository;
+    private final Integer VOTES_FOR = 2;
+    private final Integer VOTES_AGAINST = 200;
+
+    @Autowired
+    public VotingService(VotingRepository votingRepository, BidRepository bidRepository) {
+        this.votingRepository = votingRepository;
+        this.bidRepository = bidRepository;
+    }
+
+    public void voting(User user, Bid bid, BidStatus status, boolean yes) {
+        Vote vote;
+
+        if (yes) {
+
+            if (votingRepository.findVoteByUserAndBid(user, bid) == null) {
+                vote = new Vote(bid, user);
+
+            } else {
+                vote = votingRepository.findVoteByUserAndBid(user, bid);
+                vote.setVotesAgainst(null);
+            }
+            vote.setVotesFor(1);
+            votingRepository.save(vote);
+            if (votingRepository.sumVotesFor() != null && votingRepository.sumVotesFor().equals(VOTES_FOR)) {
+                bid.setStatus(status);
+                bidRepository.save(bid);
+            }
+        } else {
+            if (votingRepository.findVoteByUserAndBid(user, bid) == null) {
+                vote = new Vote(bid, user);
+
+            } else {
+                vote = votingRepository.findVoteByUserAndBid(user, bid);
+                vote.setVotesFor(null);
+            }
+            vote.setVotesAgainst(1);
+            votingRepository.save(vote);
+            if (votingRepository.sumVotesAgainst() != null && votingRepository.sumVotesAgainst() >= VOTES_AGAINST) {
+                for (Vote v : votingRepository.findVoteByBid(bid)) {
+                    votingRepository.delete(v);
+                }
+                bidRepository.delete(bid);
+            }
+        }
+    }
+
+    public String checkRoleInVoting(Bid bid, User user, Model model) {
+        if (user.getRoles().contains(Role.EXPERT) && bid.getStatus() == BidStatus.Voting_expert) {
+            model.addAttribute("bidExpertVote", bid);
+            model.addAttribute("student", false);
+        } else {
+            model.addAttribute("bidStudVote", bid);
+            model.addAttribute("student", true);
+        }
+        return "votes/voting";
+    }
+}

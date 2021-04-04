@@ -6,7 +6,9 @@ import org.springframework.security.core.userdetails.UserDetails;
 
 import javax.persistence.*;
 import javax.validation.constraints.Email;
+import javax.validation.constraints.Min;
 import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.Size;
 import java.util.Collection;
 import java.util.Set;
 
@@ -24,8 +26,10 @@ public class User implements UserDetails {
     private String password;
     private boolean active;
     @NotBlank(message = "Поле имени не может быть пустым")
+    @Size(min = 2, max=1478)
     private String name;
     @NotBlank(message = "Поле фамилии не может быть пустым")
+    @Size(min = 2, max=1478)
     private String surname;
 
 

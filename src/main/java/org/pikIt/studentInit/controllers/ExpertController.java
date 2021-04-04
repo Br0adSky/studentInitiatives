@@ -2,10 +2,9 @@ package org.pikIt.studentInit.controllers;
 
 import org.pikIt.studentInit.model.Bid;
 import org.pikIt.studentInit.model.BidStatus;
-import org.pikIt.studentInit.model.Role;
 import org.pikIt.studentInit.model.User;
-import org.pikIt.studentInit.services.BidRepository;
-import org.pikIt.studentInit.services.VotingRepository;
+import org.pikIt.studentInit.services.BidService;
+import org.pikIt.studentInit.services.VotingService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -21,70 +20,52 @@ import java.util.Collections;
 @Controller
 @PreAuthorize("hasAuthority('EXPERT')")
 public class ExpertController {
-    private final Integer VOTES_FOR = 200;
-    private final Integer VOTES_AGAINST = 200;
-    private VotingRepository votingRepository;
-    private BidRepository bidRepository;
+    private final VotingService votingService;
+    private final BidService bidService;
+
+    @Autowired
+    public ExpertController(VotingService votingService, BidService bidService) {
+        this.votingService = votingService;
+        this.bidService = bidService;
+    }
 
     @GetMapping("users/expertPage")
     public String main(Model model, @AuthenticationPrincipal User user) {
-        UserController.replaceBidsByStatus(model, bidRepository, BidStatus.Voting_expert);
+        bidService.replaceBidsByStatus(model, BidStatus.Voting_expert);
         model.addAttribute("message", "Доступные голосования");
         model.addAttribute("user", user);
         return "users/expertPage";
     }
 
-    @Autowired
-    public void setBidRepository(BidRepository bidRepository) {
-        this.bidRepository = bidRepository;
-    }
 
     @PreAuthorize("hasAuthority('USER')")
     @GetMapping("votes/voting/{bid}")
     public String voting(Model model, @PathVariable Bid bid, @AuthenticationPrincipal User user) {
-        if(user.getRoles().contains(Role.EXPERT) && bid.getStatus() == BidStatus.Voting_expert){
-            model.addAttribute("bidExpertVote", bid);
-            model.addAttribute("student", false);
-        }
-        else{
-            model.addAttribute("bidStudVote", bid);
-            model.addAttribute("student", true);
-        }
-
-        return "votes/voting";
+        return votingService.checkRoleInVoting(bid, user, model);
     }
 
     @PostMapping("users/expertPage/replaceBids")
-    public String replaceBids(Model model, @AuthenticationPrincipal User user) {
-        main(model, user);
-        return "users/expertPage";
+    public String replaceBids() {
+        return "redirect:users/expertPage";
     }
 
     @PostMapping("users/expertPage/filterText")
-    public String filterText(@RequestParam String filterText,
-                             Model model) {
-        BidController.searchByText(filterText, model, bidRepository, Collections.singletonList(BidStatus.Voting_expert));
+    public String filterText(@RequestParam String filterText, Model model) {
+        bidService.searchByText(filterText, model, Collections.singletonList(BidStatus.Voting_expert));
         return "users/expertPage";
     }
 
     @PostMapping("users/expertPage/allBidsByName")
-    public String allBidsByName(
-            @AuthenticationPrincipal User user,
-            Model model) {
-        UserController.allBidsByName(model, bidRepository, user);
+    public String allBidsByName(@AuthenticationPrincipal User user, Model model) {
+        bidService.allBidsByName(model, user);
         return "users/expertPage";
     }
 
     @PostMapping("users/expertPage/expertVote")
-    public String expertVoting(@AuthenticationPrincipal User user, @RequestParam Bid bid,
-                               @RequestParam(required = false) boolean yes, @RequestParam(required = false) boolean no) {
-        UserController.votingFor(user, bid, votingRepository, VOTES_FOR, BidStatus.Working, yes, no, VOTES_AGAINST, bidRepository);
+    public String expertVoting(@AuthenticationPrincipal User user, @RequestParam boolean vote,
+                               @RequestParam Bid bid) {
+        votingService.voting(user, bid, BidStatus.Working, vote);
         return "redirect:/users/expertPage";
     }
 
-
-    @Autowired
-    public void setVotingRepository(VotingRepository votingRepository) {
-        this.votingRepository = votingRepository;
-    }
 }

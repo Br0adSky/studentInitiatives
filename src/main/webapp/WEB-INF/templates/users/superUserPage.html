@@ -23,8 +23,17 @@
         <button type="submit">Найти</button>
         <input type="hidden" th:value="${_csrf.token}" th:name="_csrf"/>
     </form>
+    <br>
+    <form method="post" action="/users/superUserPage/inactiveUsers">
+        <button type="submit">Отобразить неактивных пользователей</button>
+        <input type="hidden" th:value="${_csrf.token}" th:name="_csrf"/>
+    </form>
+    <br>
     <a th:href="@{/bids/bidList}">Перейти в кабинет модератора</a>
     <a th:href="@{/users/expertPage}">Перейти в кабинет эксперта</a>
+    <br>
+    <td th:text="${message}"></td>
+    <br>
     <form>
         <div>Список пользователей</div>
         <table>

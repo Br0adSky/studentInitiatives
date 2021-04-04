@@ -19,6 +19,11 @@
     </label>
     <input type="hidden" th:value="${_csrf.token}" th:name="_csrf"/>
     <button type="submit">Сохранить</button>
+    <form action="/users/superUserPage/setUserInactive" method="post">
+        <input th:type="hidden" th:value="${user2.id}" th:name="userId">
+        <input type="hidden" th:value="${_csrf.token}" th:name="_csrf"/>
+        <button type="submit">Сделать неактивным</button>
+    </form>
 </form>
 </body>
 </html>
