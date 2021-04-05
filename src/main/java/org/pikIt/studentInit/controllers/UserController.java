@@ -3,7 +3,6 @@ package org.pikIt.studentInit.controllers;
 import org.pikIt.studentInit.model.Bid;
 import org.pikIt.studentInit.model.BidStatus;
 import org.pikIt.studentInit.model.User;
-import org.pikIt.studentInit.repositorys.BidRepository;
 import org.pikIt.studentInit.services.BidService;
 import org.pikIt.studentInit.services.VotingService;
 import org.springframework.beans.factory.annotation.Autowired;

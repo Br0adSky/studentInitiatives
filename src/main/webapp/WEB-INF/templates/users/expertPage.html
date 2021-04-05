@@ -43,7 +43,7 @@
         <tr th:each="bid: ${bids}">
             <td th:text="${bid.author.getName()}"></td>
             <td th:text="${bid.author.getSurname()}"></td>
-            <td th:text="${bid.text}"></td>
+            <td><a th:href="@{/comments/mainPage/{id}(id=${bid.id})}" th:text="${bid.text}"></a></td>
             <td><span th:if="${bid.address.isBlank()}">Неизвестно</span>
                 <span th:unless="${bid.address.isBlank()}"><span th:text="${bid.address}"></span></span>
             </td>

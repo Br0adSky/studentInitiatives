@@ -19,7 +19,7 @@ import java.util.Collections;
 
 @Controller
 @RequestMapping("/bids/bidList")
-@PreAuthorize("hasAuthority('MODERATOR')")
+@PreAuthorize("hasAnyAuthority('MODERATOR', 'SUPER_USER')")
 public class ModeratorController {
     private final BidService bidService;
 
@@ -29,7 +29,7 @@ public class ModeratorController {
     }
 
     @GetMapping
-    public String bidList(Model model, @AuthenticationPrincipal User user) {
+    public String bidList(Model model) {
         bidService.replaceBidsByStatus(model, BidStatus.New);
         return "bids/bidList";
     }

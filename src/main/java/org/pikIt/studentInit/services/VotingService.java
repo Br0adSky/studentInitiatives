@@ -58,7 +58,7 @@ public class VotingService {
     }
 
     public String checkRoleInVoting(Bid bid, User user, Model model) {
-        if (user.getRoles().contains(Role.EXPERT) && bid.getStatus() == BidStatus.Voting_expert) {
+        if ((user.getRoles().contains(Role.EXPERT) || user.getRoles().contains(Role.SUPER_USER)) && bid.getStatus() == BidStatus.Voting_expert) {
             model.addAttribute("bidExpertVote", bid);
             model.addAttribute("student", false);
         } else {

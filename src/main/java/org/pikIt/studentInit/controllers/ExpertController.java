@@ -18,7 +18,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import java.util.Collections;
 
 @Controller
-@PreAuthorize("hasAuthority('EXPERT')")
+@PreAuthorize("hasAnyAuthority('EXPERT', 'SUPER_USER')")
 public class ExpertController {
     private final VotingService votingService;
     private final BidService bidService;

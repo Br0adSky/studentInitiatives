@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="ru">
+<head>
+    <title>Comment Page</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+</head>
+<body>
+<form action="/comments/mainPage/back" method="post">
+    <input type="hidden" th:value="${_csrf.token}" th:name="_csrf"/>
+    <button type="submit">Назад на страницу с заявками</button>
+</form>
+<form>
+    <div>Комментарии к выбранной заявке</div>
+    <td th:text="${bid.text}">
+    </td>
+
+
+</form>
+<form method="post" action="#" th:action="@{/comments/mainPage/{id}(id=${bid.id})}" th:object="${newComment}">
+    <table>
+       <tr>
+           <td>Введите комментарий:</td>
+           <td>
+               <input type="text" th:field="*{commentText}" placeholder="Введите комментарий">
+           <td th:if="${#fields.hasErrors('commentText')}" th:errors="*{commentText}"></td>
+       </tr>
+    </table>
+    <button type="submit">Добавить комментарий</button>
+    <input type="hidden" th:value="${_csrf.token}" th:name="_csrf"/>
+</form>
+
+<form>
+    <table>
+        <tr th:each="comment : ${comments}">
+            <td th:text="${comment.user.name}"></td>
+            <td th:text="${comment.user.surname + ': '}"></td>
+            <td th:text="${comment.commentText}"></td>
+            <td><span th:if="${userRoles.contains(super) || userRoles.contains(moder) || comment.getUser()==user}"><a th:href="@{/comments/mainPage/delete/{id}(id=${comment.id})}">Удалить</a></span></td>
+        </tr></table>
+</form>
+</body>
+</html>

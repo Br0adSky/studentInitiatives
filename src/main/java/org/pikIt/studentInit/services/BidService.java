@@ -44,7 +44,6 @@ public class BidService {
                             Model model, MultipartFile file) {
         bid.setAuthor(user);
         if (bindingResult.hasErrors()) {
-            model.mergeAttributes(ControllerUtils.getErrorMap(bindingResult));
             model.addAttribute("bid", bid);
             return "bids/addNewBid";
         } else {
@@ -147,7 +146,6 @@ public class BidService {
     public String saveBid(Bid bid, BindingResult bindingResult, Model model,
                           MultipartFile file, User user) throws IOException {
         if (bindingResult.hasErrors()) {
-            model.mergeAttributes(ControllerUtils.getErrorMap(bindingResult));
             model.addAttribute("bid", bid);
             return "bids/bidEdit";
         } else {
@@ -156,7 +154,7 @@ public class BidService {
                 String fileName = file.getOriginalFilename();
                 bid.setFileName(fileName);
             }
-            if (user.getRoles().contains(Role.MODERATOR)) {
+            if (user.getRoles().contains(Role.MODERATOR) || user.getRoles().contains(Role.SUPER_USER)) {
                 bid.setStatus(BidStatus.Voting_stud);
                 bidRepository.save(bid);
                 return "redirect:/bids/bidList";
@@ -169,7 +167,7 @@ public class BidService {
     }
 
     public String delete(Bid bid, Model model, User user) {
-        if (user.getRoles().contains(Role.MODERATOR)) {
+        if (user.getRoles().contains(Role.MODERATOR) || user.getRoles().contains(Role.SUPER_USER)) {
             bidRepository.delete(bid);
             model.addAttribute("message", "Заявка была удалена");
             return "redirect:/bids/bidList";
@@ -185,7 +183,7 @@ public class BidService {
         model.addAttribute("bid2", bid);
         model.addAttribute("userRoles", user.getRoles());
         model.addAttribute("moderator", Role.MODERATOR);
-        if (user.getRoles().contains(Role.MODERATOR)) {
+        if (user.getRoles().contains(Role.MODERATOR) || user.getRoles().contains(Role.SUPER_USER)) {
             bid.setStatus(BidStatus.Moderation);
             bidRepository.save(bid);
         }

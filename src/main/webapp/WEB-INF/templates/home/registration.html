@@ -19,7 +19,7 @@
         <td th:if="${#fields.hasErrors('password')}" th:errors="*{password}"></td></label></div>
     <br>
     <input type="hidden" th:value="${_csrf.token}" th:name="_csrf"/>
-    <div><input type="submit" value="Зарегистрироваться"/></div>
+    <div><button type="submit">Зарегистрироваться</button></div>
 </form>
 </body>
 </html>

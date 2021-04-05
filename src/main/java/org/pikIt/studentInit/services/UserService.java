@@ -39,8 +39,8 @@ public class UserService implements UserDetailsService {
 
     public String adduser(User user, BindingResult bindingResult, Model model) {
         if (bindingResult.hasErrors()) {
-            model.mergeAttributes(ControllerUtils.getErrorMap(bindingResult));
             model.addAttribute("user", user);
+
             return "home/registration";
         } else {
             if (userRepository.findByEmail(user.getEmail()) != null) {
