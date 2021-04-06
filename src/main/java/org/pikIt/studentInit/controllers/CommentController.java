@@ -46,8 +46,8 @@ public class CommentController {
     }
 
     @GetMapping("/mainPage/delete/{comment}")
-    public String delete(@AuthenticationPrincipal User user, @PathVariable Comment comment){
-        commentsService.delete(user, comment);
+    public String delete(@PathVariable Comment comment){
+        commentsService.delete(comment);
         return "redirect:/comments/mainPage/" + comment.getBid().getId();
     }
 }

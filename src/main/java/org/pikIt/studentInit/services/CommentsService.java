@@ -38,7 +38,7 @@ public class CommentsService {
         return "comments/mainPage";
     }
 
-    public void delete(User user, Comment comment){
+    public void delete(Comment comment){
         commentsRepository.delete(comment);
     }
 
