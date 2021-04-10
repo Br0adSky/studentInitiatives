@@ -1,0 +1,1 @@
+if not exists create schema stud_init;
