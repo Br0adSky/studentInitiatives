@@ -20,7 +20,7 @@ import java.util.Arrays;
 
 
 @Controller
-@PreAuthorize("hasAuthority('USER')")
+@PreAuthorize("hasAnyAuthority('USER', 'SUPER_USER')")
 @RequestMapping("users/userPage")
 public class UserController {
     private final VotingService votingService;
