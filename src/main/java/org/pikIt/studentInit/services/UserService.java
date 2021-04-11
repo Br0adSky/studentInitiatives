@@ -31,6 +31,19 @@ public class UserService implements UserDetailsService {
         this.passwordEncoder = passwordEncoder;
     }
 
+    public void adminInit(){
+        if(userRepository.findByEmail("Admin@admin") == null){
+            User user = new User();
+            user.setName("Admin");
+            user.setSurname("Admin");
+            user.setEmail("Admin@admin");
+            user.setActive(true);
+            user.setRoles(Collections.singleton(Role.SUPER_USER));
+            user.setPassword(passwordEncoder.encode("admin"));
+            userRepository.save(user);
+        }
+    }
+
     public String addUserInModel(Model model) {
         User user = new User();
         model.addAttribute("user", user);

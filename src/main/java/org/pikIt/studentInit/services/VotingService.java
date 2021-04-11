@@ -11,8 +11,10 @@ import org.springframework.ui.Model;
 public class VotingService {
     private final VotingRepository votingRepository;
     private final BidRepository bidRepository;
-    private final Integer VOTES_FOR = 2;
-    private final Integer VOTES_AGAINST = 200;
+    private final Integer VOTES_FOR_STUDENT = 2;
+    private final Integer VOTES_AGAINST_STUDENT = 200;
+    private final Integer VOTES_FOR_EXPERT = VOTES_FOR_STUDENT + 2;
+    private final Integer VOTES_AGAINST_EXPERT = VOTES_AGAINST_STUDENT + 200;
 
     @Autowired
     public VotingService(VotingRepository votingRepository, BidRepository bidRepository) {
@@ -34,9 +36,16 @@ public class VotingService {
             }
             vote.setVotesFor(1);
             votingRepository.save(vote);
-            if (votingRepository.sumVotesFor() != null && votingRepository.sumVotesFor().equals(VOTES_FOR)) {
-                bid.setStatus(status);
-                bidRepository.save(bid);
+            if (bid.getStatus() == BidStatus.Voting_stud) {
+                if (votingRepository.sumVotesFor() != null && votingRepository.sumVotesFor().equals(VOTES_FOR_STUDENT)) {
+                    bid.setStatus(status);
+                    bidRepository.save(bid);
+                }
+            } else {
+                if (votingRepository.sumVotesFor() != null && votingRepository.sumVotesFor().equals(VOTES_FOR_EXPERT)) {
+                    bid.setStatus(status);
+                    bidRepository.save(bid);
+                }
             }
         } else {
             if (votingRepository.findVoteByUserAndBid(user, bid) == null) {
@@ -48,11 +57,20 @@ public class VotingService {
             }
             vote.setVotesAgainst(1);
             votingRepository.save(vote);
-            if (votingRepository.sumVotesAgainst() != null && votingRepository.sumVotesAgainst() >= VOTES_AGAINST) {
-                for (Vote v : votingRepository.findVoteByBid(bid)) {
-                    votingRepository.delete(v);
+            if (bid.getStatus() == BidStatus.Voting_stud) {
+                if (votingRepository.sumVotesAgainst() != null && votingRepository.sumVotesAgainst() >= VOTES_AGAINST_STUDENT) {
+                    for (Vote v : votingRepository.findVoteByBid(bid)) {
+                        votingRepository.delete(v);
+                    }
+                    bidRepository.delete(bid);
                 }
-                bidRepository.delete(bid);
+            } else {
+                if (votingRepository.sumVotesAgainst() != null && votingRepository.sumVotesAgainst() >= VOTES_AGAINST_EXPERT) {
+                    for (Vote v : votingRepository.findVoteByBid(bid)) {
+                        votingRepository.delete(v);
+                    }
+                    bidRepository.delete(bid);
+                }
             }
         }
     }
