@@ -34,8 +34,9 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
     }
 
     @Autowired
-    public void setUserService(UserService userService) {
+    public void setUserService(UserService userService){
         this.userService = userService;
+        userService.adminInit();
     }
 
 
